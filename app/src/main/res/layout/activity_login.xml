@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient_green">
+
+    <!-- Círculo decorativo superior direito -->
+    <View
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="-40dp"
+        android:layout_marginEnd="-40dp"
+        android:background="@drawable/circle_light_green"
+        android:alpha="0.25"/>
+
+    <!-- Círculo decorativo inferior esquerdo -->
+    <View
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="-30dp"
+        android:layout_marginStart="-30dp"
+        android:background="@drawable/circle_light_green"
+        android:alpha="0.18"/>
+
+    <!-- Card central -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="340dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="16dp"
+        app:cardBackgroundColor="#FAFFFE">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingHorizontal="28dp"
+            android:paddingTop="36dp"
+            android:paddingBottom="28dp">
+
+            <!-- Container do logo com fundo suave -->
+            <FrameLayout
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginBottom="14dp"
+                android:background="@drawable/bg_logo_circle">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/logo2"
+                    android:scaleType="fitCenter"/>
+            </FrameLayout>
+
+            <!-- Título -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Agente Mirim"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#1B5E20"
+                android:letterSpacing="0.02"
+                android:layout_marginBottom="4dp"/>
+
+            <!-- Subtítulo -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ACESSO À PLATAFORMA"
+                android:textSize="10sp"
+                android:textColor="#66BB6A"
+                android:letterSpacing="0.1"
+                android:layout_marginBottom="28dp"/>
+
+            <!-- Label Usuário -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="USUÁRIO"
+                android:textSize="10sp"
+                android:textColor="#388E3C"
+                android:textStyle="bold"
+                android:letterSpacing="0.08"
+                android:layout_marginBottom="6dp"/>
+
+            <!-- Campo Usuário -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxStrokeColor="#C8E6C9"
+                app:boxBackgroundColor="#F1F8E9"
+                app:startIconTint="#81C784"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editUsuario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Digite seu usuário"
+                    android:textColor="#2E7D32"
+                    android:textColorHint="#A5D6A7"
+                    android:textSize="14sp"
+                    android:padding="14dp"
+                    android:inputType="text"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Label Senha -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="SENHA"
+                android:textSize="10sp"
+                android:textColor="#388E3C"
+                android:textStyle="bold"
+                android:letterSpacing="0.08"
+                android:layout_marginBottom="6dp"/>
+
+            <!-- Campo Senha -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxStrokeColor="#C8E6C9"
+                app:boxBackgroundColor="#F1F8E9"
+                app:startIconTint="#81C784"
+                app:endIconMode="password_toggle"
+                app:endIconTint="#81C784"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editSenha"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="••••••••"
+                    android:textColor="#2E7D32"
+                    android:textColorHint="#A5D6A7"
+                    android:textSize="14sp"
+                    android:padding="14dp"
+                    android:inputType="textPassword"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Divisória -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E8F5E9"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="20dp"/>
+
+            <!-- Botão Entrar -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLogin"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="ENTRAR"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:letterSpacing="0.1"
+                app:backgroundTint="#2E7D32"
+                app:cornerRadius="14dp"
+                app:elevation="4dp"/>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Versão no rodapé -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:text="Versão de Teste · Agente Mirim"
+        android:textSize="11sp"
+        android:textColor="#FFFFFF"
+        android:alpha="0.55"/>
+
+</RelativeLayout>
