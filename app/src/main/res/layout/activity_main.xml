@@ -1,26 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical"
     android:background="#E8F5E9">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Bem-vindo, Admin!"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="#1B5E20"
-        android:layout_marginBottom="32dp"/>
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:paddingTop="24dp"
+        android:background="#2E7D32"
+        app:titleTextColor="#FFFFFF"
+        app:title="Painel Admin">
 
-    <Button
-        android:id="@+id/btnSair"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:text="SAIR"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#2E7D32"/>
+        <ImageView
+            android:id="@+id/ivUsuario"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="end"
+            android:layout_marginEnd="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="Opções do usuário"
+            android:focusable="true"
+            android:src="@drawable/ic_account_circle"
+            android:visibility="visible" />
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bem-vindo, Admin!"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#1B5E20"/>
+
+    </LinearLayout>
 
 </LinearLayout>
