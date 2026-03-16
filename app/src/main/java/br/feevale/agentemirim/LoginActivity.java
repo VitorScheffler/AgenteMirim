@@ -3,39 +3,59 @@ package br.feevale.agentemirim;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.View;
+import android.widget.ProgressBar;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private TextInputLayout layoutUsuario, layoutSenha;
+    private TextInputLayout   layoutUsuario, layoutSenha;
     private TextInputEditText editUsuario, editSenha;
+    private MaterialButton    btnLogin;
+    private ProgressBar       progressBar;
+    private FirebaseAuth      mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        layoutUsuario = findViewById(R.id.layoutUsuario);
-        layoutSenha = findViewById(R.id.layoutSenha);
-        editUsuario = findViewById(R.id.editUsuario);
-        editSenha = findViewById(R.id.editSenha);
-        MaterialButton btnLogin = findViewById(R.id.btnLogin);
+        mAuth = FirebaseAuth.getInstance();
+
+        layoutUsuario = findViewById(R.id.layoutEmail);
+        layoutSenha   = findViewById(R.id.layoutSenha);
+        editUsuario   = findViewById(R.id.editEmail);
+        editSenha     = findViewById(R.id.editSenha);
+        btnLogin      = findViewById(R.id.btnLogin);
+        progressBar   = findViewById(R.id.progressBar);
 
         btnLogin.setOnClickListener(v -> login());
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Se o usuário já tem sessão ativa, pula o login direto
+        FirebaseUser usuarioAtual = mAuth.getCurrentUser();
+        if (usuarioAtual != null) {
+            irParaMain();
+        }
+    }
+
     private void login() {
-        String usuario = editUsuario.getText().toString().trim();
+        String email = editUsuario.getText().toString().trim();
         String senha = editSenha.getText().toString().trim();
 
         layoutUsuario.setError(null);
         layoutSenha.setError(null);
 
-        if (TextUtils.isEmpty(usuario)) {
-            layoutUsuario.setError("Informe o usuário");
+        if (TextUtils.isEmpty(email)) {
+            layoutUsuario.setError("Informe o e-mail");
             return;
         }
 
@@ -44,17 +64,38 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        if (usuario.equals("admin") && senha.equals("admin")) {
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
-        } else {
-            layoutUsuario.setError("Usuário ou senha incorretos");
-            layoutSenha.setError("Usuário ou senha incorretos");
+        setCarregando(true);
+
+        // Autentica pelo Firebase
+        mAuth.signInWithEmailAndPassword(email, senha)
+                .addOnCompleteListener(this, task -> {
+                    setCarregando(false);
+                    if (task.isSuccessful()) {
+                        irParaMain();
+                    } else {
+                        layoutSenha.setError("E-mail ou senha incorretos");
+                        editSenha.setText("");
+                    }
+                });
+    }
+
+    private void irParaMain() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void setCarregando(boolean carregando) {
+        btnLogin.setEnabled(!carregando);
+        btnLogin.setText(carregando ? "Entrando..." : "ENTRAR");
+        if (progressBar != null) {
+            progressBar.setVisibility(carregando ? View.VISIBLE : View.GONE);
         }
     }
 
     @Override
     public void onBackPressed() {
-        // bloqueia voltar na tela de login
+        // Bloqueia voltar na tela de login
     }
 }

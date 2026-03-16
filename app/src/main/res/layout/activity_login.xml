@@ -86,16 +86,16 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="USUÁRIO"
+                android:text="E-MAIL"
                 android:textSize="10sp"
                 android:textColor="#388E3C"
                 android:textStyle="bold"
                 android:letterSpacing="0.08"
                 android:layout_marginBottom="6dp"/>
 
-            <!-- Campo Usuário -->
+            <!-- Campo e-mail -->
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/layoutUsuario"
+                android:id="@+id/layoutEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -109,10 +109,10 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editUsuario"
+                    android:id="@+id/editEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Digite seu usuário"
+                    android:hint="Digite seu e-mail"
                     android:textColor="#2E7D32"
                     android:textColorHint="#A5D6A7"
                     android:textSize="14sp"
@@ -181,6 +181,15 @@
                 app:backgroundTint="#2E7D32"
                 app:cornerRadius="14dp"
                 app:elevation="4dp"/>
+
+            <!-- Loading enquanto autentica no Firebase -->
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:visibility="gone"
+                android:indeterminateTint="#2E7D32"/>
 
         </LinearLayout>
 

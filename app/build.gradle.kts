@@ -1,14 +1,11 @@
 plugins {
+    id("com.google.gms.google-services")
     alias(libs.plugins.android.application)
 }
 
 android {
     namespace = "br.feevale.agentemirim"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "br.feevale.agentemirim"
@@ -41,4 +38,13 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
+
+    // Firebase Analytics
+    implementation("com.google.firebase:firebase-analytics")
+
+    // Firebase Authentication
+    implementation("com.google.firebase:firebase-auth")
 }
