@@ -58,6 +58,7 @@
                     android:layout_gravity="center"
                     android:src="@drawable/logo2"
                     android:scaleType="fitCenter"/>
+
             </FrameLayout>
 
             <!-- Título -->
@@ -94,6 +95,7 @@
 
             <!-- Campo Usuário -->
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutUsuario"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -131,6 +133,7 @@
 
             <!-- Campo Senha -->
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutSenha"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
