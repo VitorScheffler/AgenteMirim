@@ -38,16 +38,29 @@
                 android:textColor="#66BB6A"
                 android:layout_marginBottom="24dp"/>
 
-            <!-- Campo Email -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="CONFIRME SEU E-MAIL"
+                android:textSize="10sp"
+                android:textColor="#388E3C"
+                android:textStyle="bold"
+                android:letterSpacing="0.08"
+                android:layout_marginBottom="6dp"/>
+
+            <!-- Campo e-mail -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layoutEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 app:boxCornerRadiusTopStart="12dp"
                 app:boxCornerRadiusTopEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
                 app:boxCornerRadiusBottomEnd="12dp"
+                app:boxStrokeColor="#C8E6C9"
                 app:boxBackgroundColor="#F1F8E9"
+                app:startIconTint="#81C784"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
