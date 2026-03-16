@@ -117,7 +117,7 @@
                     android:textColorHint="#A5D6A7"
                     android:textSize="14sp"
                     android:padding="14dp"
-                    android:inputType="text"/>
+                    android:inputType="textEmailAddress"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Label Senha -->
@@ -160,13 +160,22 @@
                     android:inputType="textPassword"/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <TextView
+                android:id="@+id/txtEsqueciSenha"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Esqueci minha senha"
+                android:textColor="#2E7D32"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:layout_gravity="left"
+                android:layout_marginBottom="12dp"/>
+
             <!-- Divisória -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#E8F5E9"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="20dp"/>
+                android:background="#E8F5E9"/>
 
             <!-- Botão Entrar -->
             <com.google.android.material.button.MaterialButton
