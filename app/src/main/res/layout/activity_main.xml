@@ -1,51 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#E8F5E9">
+    android:fitsSystemWindows="true">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:paddingTop="24dp"
-        android:background="#2E7D32"
-        app:titleTextColor="#FFFFFF"
-        app:title="Painel Admin">
-
-        <ImageView
-            android:id="@+id/ivUsuario"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="end"
-            android:layout_marginEnd="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:contentDescription="Opções do usuário"
-            android:focusable="true"
-            android:src="@drawable/ic_account_circle"
-            android:visibility="visible" />
-
-    </androidx.appcompat.widget.Toolbar>
-
+    <!-- ── Conteúdo principal ── -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:fitsSystemWindows="true"
+        android:background="#E8F5E9">
 
-        <TextView
-            android:id="@+id/txtBoasVindas"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Bem-vindo!"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="#1B5E20"/>
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="#2E7D32"
+            android:elevation="6dp"
+            app:contentInsetStart="0dp"
+            app:contentInsetEnd="0dp">
+
+            <!-- Layout interno da toolbar com RelativeLayout para posicionamento preciso -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp">
+
+                <!-- Ícone menu hambúrguer (esquerda) — só para admins -->
+                <ImageView
+                    android:id="@+id/ivMenu"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_menu"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:visibility="gone"
+                    android:contentDescription="Menu admin"
+                    android:padding="2dp"/>
+
+                <!-- Ícone usuário (direita) -->
+                <ImageView
+                    android:id="@+id/ivUsuario"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_account_circle"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Minha conta"
+                    android:padding="2dp"/>
+
+            </RelativeLayout>
+
+        </androidx.appcompat.widget.Toolbar>
+
+        <!-- Conteúdo da tela -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtBoasVindas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bem-vindo!"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#1B5E20"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+    <!-- ── Painel lateral admin (abre pela esquerda) ── -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navAdmin"
+        android:layout_width="260dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="#FAFFFE"
+        app:headerLayout="@menu/nav_header_admin"
+        app:menu="@menu/menu_admin"
+        app:itemTextColor="#1B5E20"
+        app:itemIconTint="#2E7D32"
+        app:itemRippleColor="#E8F5E9"
+        app:itemBackground="@null"
+        app:itemTextAppearance="@style/TextAppearance.AppCompat.Body1"/>
+
+</androidx.drawerlayout.widget.DrawerLayout>
