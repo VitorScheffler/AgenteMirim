@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#E8F5E9">
+
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:paddingTop="24dp"
+        android:background="#2E7D32"
+        app:titleTextColor="#FFFFFF"
+        app:title="Minha Conta" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="32dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Card: Conta atual -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#FAFFFE">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="18dp">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_account_circle"
+                        android:layout_marginEnd="14dp"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="CONTA ATUAL"
+                            android:textSize="10sp"
+                            android:textColor="#66BB6A"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.1"/>
+
+                        <TextView
+                            android:id="@+id/txtEmailAtual"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="carregando..."
+                            android:textSize="14sp"
+                            android:textColor="#1B5E20"
+                            android:textStyle="bold"/>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Card: Alterar e-mail -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#FAFFFE">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ALTERAR E-MAIL"
+                        android:textSize="11sp"
+                        android:textColor="#388E3C"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08"
+                        android:layout_marginBottom="16dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="NOVO E-MAIL"
+                        android:textSize="10sp"
+                        android:textColor="#388E3C"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08"
+                        android:layout_marginBottom="6dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutNovoEmail"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxStrokeColor="#C8E6C9"
+                        app:boxBackgroundColor="#F1F8E9">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editNovoEmail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="novo@email.com"
+                            android:inputType="textEmailAddress"
+                            android:textColor="#2E7D32"
+                            android:textColorHint="#A5D6A7"
+                            android:textSize="14sp"
+                            android:padding="14dp"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="SENHA ATUAL (CONFIRMAÇÃO)"
+                        android:textSize="10sp"
+                        android:textColor="#388E3C"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08"
+                        android:layout_marginBottom="6dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutSenhaConfirmEmail"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxStrokeColor="#C8E6C9"
+                        app:boxBackgroundColor="#F1F8E9"
+                        app:endIconMode="password_toggle"
+                        app:endIconTint="#81C784">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editSenhaConfirmEmail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="••••••••"
+                            android:inputType="textPassword"
+                            android:textColor="#2E7D32"
+                            android:textColorHint="#A5D6A7"
+                            android:textSize="14sp"
+                            android:padding="14dp"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAlterarEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="SALVAR NOVO E-MAIL"
+                        android:textColor="#FFFFFF"
+                        android:textStyle="bold"
+                        android:textSize="13sp"
+                        android:letterSpacing="0.08"
+                        app:backgroundTint="#2E7D32"
+                        app:cornerRadius="12dp"
+                        app:elevation="4dp"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Card: Alterar senha -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#FAFFFE">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ALTERAR SENHA"
+                        android:textSize="11sp"
+                        android:textColor="#388E3C"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08"
+                        android:layout_marginBottom="16dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="SENHA ATUAL"
+                        android:textSize="10sp"
+                        android:textColor="#388E3C"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08"
+                        android:layout_marginBottom="6dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutSenhaAtual"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxStrokeColor="#C8E6C9"
+                        app:boxBackgroundColor="#F1F8E9"
+                        app:endIconMode="password_toggle"
+                        app:endIconTint="#81C784">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editSenhaAtual"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="••••••••"
+                            android:inputType="textPassword"
+                            android:textColor="#2E7D32"
+                            android:textColorHint="#A5D6A7"
+                            android:textSize="14sp"
+                            android:padding="14dp"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="NOVA SENHA"
+                        android:textSize="10sp"
+                        android:textColor="#388E3C"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08"
+                        android:layout_marginBottom="6dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutNovaSenha"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxStrokeColor="#C8E6C9"
+                        app:boxBackgroundColor="#F1F8E9"
+                        app:endIconMode="password_toggle"
+                        app:endIconTint="#81C784">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editNovaSenha"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="mínimo 6 caracteres"
+                            android:inputType="textPassword"
+                            android:textColor="#2E7D32"
+                            android:textColorHint="#A5D6A7"
+                            android:textSize="14sp"
+                            android:padding="14dp"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Barra de força da senha -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="4dp"
+                        android:weightSum="5">
+                        <View android:id="@+id/barra1" android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:layout_marginEnd="3dp" android:background="#E0E0E0"/>
+                        <View android:id="@+id/barra2" android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:layout_marginEnd="3dp" android:background="#E0E0E0"/>
+                        <View android:id="@+id/barra3" android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:layout_marginEnd="3dp" android:background="#E0E0E0"/>
+                        <View android:id="@+id/barra4" android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:layout_marginEnd="3dp" android:background="#E0E0E0"/>
+                        <View android:id="@+id/barra5" android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="#E0E0E0"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/txtForcaSenha"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="11sp"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="CONFIRMAR NOVA SENHA"
+                        android:textSize="10sp"
+                        android:textColor="#388E3C"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08"
+                        android:layout_marginBottom="6dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutConfirmarSenha"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxStrokeColor="#C8E6C9"
+                        app:boxBackgroundColor="#F1F8E9"
+                        app:endIconMode="password_toggle"
+                        app:endIconTint="#81C784">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editConfirmarSenha"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="repita a nova senha"
+                            android:inputType="textPassword"
+                            android:textColor="#2E7D32"
+                            android:textColorHint="#A5D6A7"
+                            android:textSize="14sp"
+                            android:padding="14dp"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAlterarSenha"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="SALVAR NOVA SENHA"
+                        android:textColor="#FFFFFF"
+                        android:textStyle="bold"
+                        android:textSize="13sp"
+                        android:letterSpacing="0.08"
+                        app:backgroundTint="#2E7D32"
+                        app:cornerRadius="12dp"
+                        app:elevation="4dp"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"
+        android:indeterminateTint="#2E7D32"/>
+
+</LinearLayout>

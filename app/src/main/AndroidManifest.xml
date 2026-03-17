@@ -42,6 +42,23 @@
             android:exported="false"
             android:screenOrientation="portrait"/>
 
+        <!-- Tela perfil do usuario -->
+        <activity android:name=".PerfilUsuarioActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+
+        <!-- Tela completar perfil -->
+        <activity android:name=".CompletarPerfilActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+
+        <!-- Tela criar usuario -->
+        <activity android:name=".CriarUsuarioActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".GerenciarUsuariosActivity" />
+
     </application>
 
 </manifest>

@@ -38,9 +38,10 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/txtBoasVindas"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bem-vindo, Admin!"
+            android:text="Bem-vindo!"
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="#1B5E20"/>
