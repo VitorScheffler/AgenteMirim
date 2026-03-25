@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -37,18 +38,19 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        drawerLayout = findViewById(R.id.drawerLayout);
+        drawerLayout    = findViewById(R.id.drawerLayout);
         ImageView ivMenu    = findViewById(R.id.ivMenu);
         ImageView ivUsuario = findViewById(R.id.ivUsuario);
         TextView  txtBoasVindas = findViewById(R.id.txtBoasVindas);
+        CardView  cardConteudos = findViewById(R.id.cardConteudos);
 
-        // Carrega dados do usuário
+        // ── Carrega dados do usuário ──────────────────────────────────────────
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             db.collection("usuarios").document(user.getUid())
                     .get()
                     .addOnSuccessListener(doc -> {
-                        // Boas-vindas
+                        // Boas-vindas com primeiro nome
                         String nome = doc.getString("nome");
                         if (nome != null && !nome.isEmpty()) {
                             txtBoasVindas.setText("Bem-vindo, " + nome.split(" ")[0] + "!");
@@ -60,12 +62,12 @@ public class MainActivity extends AppCompatActivity {
                     });
         }
 
-        // ☰ Abre o painel lateral admin
+        // ── ☰ Abre o painel lateral admin ─────────────────────────────────────
         ivMenu.setOnClickListener(v -> {
             if (isAdmin) drawerLayout.openDrawer(GravityCompat.START);
         });
 
-        // Itens do painel lateral
+        // ── Itens do painel lateral ───────────────────────────────────────────
         NavigationView navAdmin = findViewById(R.id.navAdmin);
         navAdmin.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -78,11 +80,15 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        // 👤 PopupMenu do usuário (direita)
+        // ── Card Conteúdos ────────────────────────────────────────────────────
+        cardConteudos.setOnClickListener(v ->
+                startActivity(new Intent(this, ConteudosActivity.class)));
+
+        // ── 👤 PopupMenu do usuário (direita) ─────────────────────────────────
         ivUsuario.setOnClickListener(this::exibirMenuUsuario);
     }
 
-    // ── Menu usuário (direita) ────────────────────────────────────────────────
+    // ── Menu usuário ──────────────────────────────────────────────────────────
 
     private void exibirMenuUsuario(View anchorView) {
         PopupMenu popup = new PopupMenu(this, anchorView);
@@ -125,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // Fecha o drawer se estiver aberto
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
