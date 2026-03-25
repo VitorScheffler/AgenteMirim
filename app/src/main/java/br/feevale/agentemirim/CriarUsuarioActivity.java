@@ -26,12 +26,12 @@ public class CriarUsuarioActivity extends AppCompatActivity {
 
     private TextInputLayout   layoutNome, layoutEmail, layoutSenha;
     private TextInputEditText editNome, editEmail, editSenha;
-    private LinearLayout      btnPerfilUsuario, btnPerfilAdmin;
-    private TextView          txtPerfilUsuario, txtPerfilAdmin;
+    private LinearLayout      btnPerfilUsuario, btnPerfilProjeto, btnPerfilAdmin;
+    private TextView          txtPerfilUsuario, txtPerfilProjeto, txtPerfilAdmin;
     private MaterialButton    btnCriar;
     private ProgressBar       progressBar;
 
-    private String perfilSelecionado = "usuario"; // padrão
+    private String perfilSelecionado = "usuario";
 
     private FirebaseFirestore db;
 
@@ -61,8 +61,10 @@ public class CriarUsuarioActivity extends AppCompatActivity {
         editEmail        = findViewById(R.id.editEmail);
         editSenha        = findViewById(R.id.editSenha);
         btnPerfilUsuario = findViewById(R.id.btnPerfilUsuario);
+        btnPerfilProjeto = findViewById(R.id.btnPerfilProjeto);
         btnPerfilAdmin   = findViewById(R.id.btnPerfilAdmin);
         txtPerfilUsuario = findViewById(R.id.txtPerfilUsuario);
+        txtPerfilProjeto = findViewById(R.id.txtPerfilProjeto);
         txtPerfilAdmin   = findViewById(R.id.txtPerfilAdmin);
         btnCriar         = findViewById(R.id.btnCriar);
         progressBar      = findViewById(R.id.progressBar);
@@ -71,25 +73,29 @@ public class CriarUsuarioActivity extends AppCompatActivity {
     // ── Seletor de perfil ─────────────────────────────────────────────────────
 
     private void configurarSeletorPerfil() {
-        selecionarPerfil("usuario"); // começa selecionado
+        selecionarPerfil("usuario");
         btnPerfilUsuario.setOnClickListener(v -> selecionarPerfil("usuario"));
+        btnPerfilProjeto.setOnClickListener(v -> selecionarPerfil("projeto"));
         btnPerfilAdmin.setOnClickListener(v -> selecionarPerfil("admin"));
     }
 
     private void selecionarPerfil(String perfil) {
         perfilSelecionado = perfil;
 
-        if ("usuario".equals(perfil)) {
-            btnPerfilUsuario.setBackgroundColor(0xFF2E7D32);
-            txtPerfilUsuario.setTextColor(0xFFFFFFFF);
-            btnPerfilAdmin.setBackgroundColor(0xFFE8F5E9);
-            txtPerfilAdmin.setTextColor(0xFF2E7D32);
-        } else {
-            btnPerfilAdmin.setBackgroundColor(0xFF2E7D32);
-            txtPerfilAdmin.setTextColor(0xFFFFFFFF);
-            btnPerfilUsuario.setBackgroundColor(0xFFE8F5E9);
-            txtPerfilUsuario.setTextColor(0xFF2E7D32);
-        }
+        // Reset todos
+        int corAtivo   = 0xFF2E7D32;
+        int corInativo = 0xFFE8F5E9;
+        int textoAtivo = 0xFFFFFFFF;
+        int textoInativo = 0xFF2E7D32;
+
+        btnPerfilUsuario.setBackgroundColor("usuario".equals(perfil) ? corAtivo : corInativo);
+        txtPerfilUsuario.setTextColor("usuario".equals(perfil) ? textoAtivo : textoInativo);
+
+        btnPerfilProjeto.setBackgroundColor("projeto".equals(perfil) ? corAtivo : corInativo);
+        txtPerfilProjeto.setTextColor("projeto".equals(perfil) ? textoAtivo : textoInativo);
+
+        btnPerfilAdmin.setBackgroundColor("admin".equals(perfil) ? corAtivo : corInativo);
+        txtPerfilAdmin.setTextColor("admin".equals(perfil) ? textoAtivo : textoInativo);
     }
 
     // ── Criar usuário ─────────────────────────────────────────────────────────
@@ -115,11 +121,6 @@ public class CriarUsuarioActivity extends AppCompatActivity {
 
         setCarregando(true);
 
-        /*
-         * Usa uma instância SECUNDÁRIA do Firebase para criar o usuário.
-         * Sem isso, o createUserWithEmailAndPassword() deslogaria o admin,
-         * pois o Firebase loga automaticamente o usuário recém-criado.
-         */
         FirebaseApp appSecundario = obterAppSecundario();
         FirebaseAuth authSecundario = FirebaseAuth.getInstance(appSecundario);
 
@@ -129,17 +130,16 @@ public class CriarUsuarioActivity extends AppCompatActivity {
 
                     String novoUid = result.getUser().getUid();
 
-                    // Salva no Firestore vinculado ao UID do novo usuário
                     Map<String, Object> dados = new HashMap<>();
                     dados.put("nome",           nome);
                     dados.put("email",          email);
                     dados.put("perfil",         perfilSelecionado);
-                    dados.put("perfilCompleto", false); // obriga a completar no 1º acesso
+                    dados.put("perfilCompleto", false);
 
                     db.collection("usuarios").document(novoUid)
                             .set(dados)
                             .addOnSuccessListener(v -> {
-                                authSecundario.signOut(); // desloga instância secundária
+                                authSecundario.signOut();
                                 setCarregando(false);
                                 mostrarSucesso(nome, email);
                             })
@@ -157,10 +157,6 @@ public class CriarUsuarioActivity extends AppCompatActivity {
                 });
     }
 
-    /**
-     * Retorna (ou cria) uma instância secundária do FirebaseApp.
-     * Isso permite criar usuários sem deslogar o admin logado na instância principal.
-     */
     private FirebaseApp obterAppSecundario() {
         final String NOME = "AppSecundario";
         for (FirebaseApp app : FirebaseApp.getApps(this)) {
@@ -173,11 +169,14 @@ public class CriarUsuarioActivity extends AppCompatActivity {
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private void mostrarSucesso(String nome, String email) {
+        String labelPerfil = perfilSelecionado.equals("projeto") ? "PROJETO"
+                : perfilSelecionado.toUpperCase();
+
         new AlertDialog.Builder(this)
                 .setTitle("✅ Usuário criado!")
                 .setMessage("Nome: " + nome
                         + "\nE-mail: " + email
-                        + "\nPerfil: " + perfilSelecionado.toUpperCase()
+                        + "\nPerfil: " + labelPerfil
                         + "\n\nO usuário deverá completar seus dados no primeiro acesso.")
                 .setPositiveButton("OK", (d, w) -> {
                     editNome.setText("");

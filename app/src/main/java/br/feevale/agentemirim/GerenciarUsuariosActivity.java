@@ -57,10 +57,8 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
         editBusca        = findViewById(R.id.editBusca);
         txtContador      = findViewById(R.id.txtContador);
 
-        // Verifica se é admin antes de carregar
         verificarAcessoECarregar();
 
-        // Filtro de busca em tempo real
         editBusca.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
             @Override public void afterTextChanged(Editable s) {}
@@ -81,8 +79,7 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
         db.collection("usuarios").document(user.getUid())
                 .get()
                 .addOnSuccessListener(doc -> {
-                    boolean isAdmin = doc.exists()
-                            && "admin".equals(doc.getString("perfil"));
+                    boolean isAdmin = doc.exists() && "admin".equals(doc.getString("perfil"));
 
                     if (!isAdmin) {
                         setCarregando(false);
@@ -99,7 +96,7 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> { setCarregando(false); finish(); });
     }
 
-    // ── Carregar usuários do Firestore ────────────────────────────────────────
+    // ── Carregar usuários ─────────────────────────────────────────────────────
 
     private void carregarUsuarios() {
         setCarregando(true);
@@ -108,7 +105,6 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(query -> {
                     setCarregando(false);
-
                     List<DocumentSnapshot> docs = query.getDocuments();
 
                     if (docs.isEmpty()) {
@@ -119,7 +115,6 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
                     }
 
                     txtContador.setText(docs.size() + " usuário(s) cadastrado(s)");
-
                     adapter = new UsuarioAdapter(docs, this::abrirDialogEditar);
                     recyclerUsuarios.setLayoutManager(new LinearLayoutManager(this));
                     recyclerUsuarios.setAdapter(adapter);
@@ -132,34 +127,40 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
     // ── Dialog editar usuário ─────────────────────────────────────────────────
 
     private void abrirDialogEditar(DocumentSnapshot doc) {
-        String uid   = doc.getId();
-        String nome  = doc.getString("nome")  != null ? doc.getString("nome")  : "";
-        String email = doc.getString("email") != null ? doc.getString("email") : "";
-        String perfil= doc.getString("perfil")!= null ? doc.getString("perfil"): "usuario";
+        String uid    = doc.getId();
+        String nome   = doc.getString("nome")   != null ? doc.getString("nome")   : "";
+        String email  = doc.getString("email")  != null ? doc.getString("email")  : "";
+        String perfil = doc.getString("perfil") != null ? doc.getString("perfil") : "usuario";
 
-        // Monta o dialog com campos editáveis
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_editar_usuario, null);
 
-        TextInputEditText editNome   = view.findViewById(R.id.editNomeDialog);
-        TextInputEditText editEmail  = view.findViewById(R.id.editEmailDialog);
-        TextView          txtPerfil  = view.findViewById(R.id.txtPerfilAtual);
-        TextView          btnUsuario = view.findViewById(R.id.btnDialogUsuario);
-        TextView          btnAdmin   = view.findViewById(R.id.btnDialogAdmin);
+        TextInputEditText editNome  = view.findViewById(R.id.editNomeDialog);
+        TextInputEditText editEmail = view.findViewById(R.id.editEmailDialog);
+        TextView txtPerfilAtual     = view.findViewById(R.id.txtPerfilAtual);
+        TextView btnUsuario         = view.findViewById(R.id.btnDialogUsuario);
+        TextView btnProjeto         = view.findViewById(R.id.btnDialogProjeto);
+        TextView btnAdmin           = view.findViewById(R.id.btnDialogAdmin);
 
         editNome.setText(nome);
         editEmail.setText(email);
-        txtPerfil.setText("Perfil atual: " + perfil.toUpperCase());
 
-        // Controle de seleção de perfil dentro do dialog
+        String labelPerfil = perfil.equals("projeto") ? "PROJETO" : perfil.toUpperCase();
+        txtPerfilAtual.setText("Perfil atual: " + labelPerfil);
+
         final String[] perfilSelecionado = {perfil};
-        atualizarBotoesPerfil(btnUsuario, btnAdmin, perfilSelecionado[0]);
+        atualizarBotoesPerfil(btnUsuario, btnProjeto, btnAdmin, perfilSelecionado[0]);
+
         btnUsuario.setOnClickListener(v -> {
             perfilSelecionado[0] = "usuario";
-            atualizarBotoesPerfil(btnUsuario, btnAdmin, "usuario");
+            atualizarBotoesPerfil(btnUsuario, btnProjeto, btnAdmin, "usuario");
+        });
+        btnProjeto.setOnClickListener(v -> {
+            perfilSelecionado[0] = "projeto";
+            atualizarBotoesPerfil(btnUsuario, btnProjeto, btnAdmin, "projeto");
         });
         btnAdmin.setOnClickListener(v -> {
             perfilSelecionado[0] = "admin";
-            atualizarBotoesPerfil(btnUsuario, btnAdmin, "admin");
+            atualizarBotoesPerfil(btnUsuario, btnProjeto, btnAdmin, "admin");
         });
 
         new AlertDialog.Builder(this)
@@ -175,18 +176,21 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void atualizarBotoesPerfil(TextView btnUsuario, TextView btnAdmin, String selecionado) {
-        if ("usuario".equals(selecionado)) {
-            btnUsuario.setBackgroundColor(0xFF2E7D32);
-            btnUsuario.setTextColor(0xFFFFFFFF);
-            btnAdmin.setBackgroundColor(0xFFE8F5E9);
-            btnAdmin.setTextColor(0xFF2E7D32);
-        } else {
-            btnAdmin.setBackgroundColor(0xFF2E7D32);
-            btnAdmin.setTextColor(0xFFFFFFFF);
-            btnUsuario.setBackgroundColor(0xFFE8F5E9);
-            btnUsuario.setTextColor(0xFF2E7D32);
-        }
+    private void atualizarBotoesPerfil(TextView btnUsuario, TextView btnProjeto,
+                                        TextView btnAdmin, String selecionado) {
+        int corAtivo    = 0xFF2E7D32;
+        int corInativo  = 0xFFE8F5E9;
+        int textoAtivo  = 0xFFFFFFFF;
+        int textoInativo= 0xFF2E7D32;
+
+        btnUsuario.setBackgroundColor("usuario".equals(selecionado) ? corAtivo : corInativo);
+        btnUsuario.setTextColor("usuario".equals(selecionado) ? textoAtivo : textoInativo);
+
+        btnProjeto.setBackgroundColor("projeto".equals(selecionado) ? corAtivo : corInativo);
+        btnProjeto.setTextColor("projeto".equals(selecionado) ? textoAtivo : textoInativo);
+
+        btnAdmin.setBackgroundColor("admin".equals(selecionado) ? corAtivo : corInativo);
+        btnAdmin.setTextColor("admin".equals(selecionado) ? textoAtivo : textoInativo);
     }
 
     // ── Salvar edição ─────────────────────────────────────────────────────────
@@ -204,7 +208,7 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
                 .addOnSuccessListener(v -> {
                     setCarregando(false);
                     mostrarSucesso("Usuário atualizado!");
-                    carregarUsuarios(); // recarrega a lista
+                    carregarUsuarios();
                 })
                 .addOnFailureListener(e -> {
                     setCarregando(false);
@@ -217,7 +221,7 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
     private void confirmarExclusao(String uid, String nome) {
         new AlertDialog.Builder(this)
                 .setTitle("Excluir usuário")
-                .setMessage("Deseja excluir o usuário \"" + nome + "\"?\n\nEsta ação remove os dados do Firestore. A conta do Firebase Auth deve ser removida manualmente pelo console.")
+                .setMessage("Deseja excluir o usuário \"" + nome + "\"?\n\nEsta ação remove os dados do Firestore.")
                 .setPositiveButton("Excluir", (d, w) -> excluirUsuario(uid))
                 .setNegativeButton("Cancelar", null)
                 .show();
@@ -256,7 +260,7 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
                 .setPositiveButton("OK", null).show();
     }
 
-    // ── Adapter interno ───────────────────────────────────────────────────────
+    // ── Adapter ───────────────────────────────────────────────────────────────
 
     interface OnEditarClick { void onClick(DocumentSnapshot doc); }
 
@@ -302,17 +306,30 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
             String email  = doc.getString("email")  != null ? doc.getString("email")  : "";
             String perfil = doc.getString("perfil") != null ? doc.getString("perfil") : "usuario";
 
-            // Inicial do nome no avatar
             holder.txtAvatar.setText(nome.isEmpty() ? "?" :
                     String.valueOf(nome.charAt(0)).toUpperCase());
-
             holder.txtNome.setText(nome);
             holder.txtEmail.setText(email);
-            holder.txtBadge.setText(perfil.toUpperCase());
 
-            // Cor do badge: admin = verde escuro, usuario = verde claro
-            holder.txtBadge.setBackgroundColor(
-                    "admin".equals(perfil) ? 0xFF1B5E20 : 0xFF66BB6A);
+            // Label e cor do badge por perfil
+            String badgeLabel;
+            int    badgeCor;
+            switch (perfil) {
+                case "admin":
+                    badgeLabel = "ADMIN";
+                    badgeCor   = 0xFF1B5E20;
+                    break;
+                case "projeto":
+                    badgeLabel = "PROJETO";
+                    badgeCor   = 0xFF1565C0; // azul para distinguir
+                    break;
+                default:
+                    badgeLabel = "USUÁRIO";
+                    badgeCor   = 0xFF66BB6A;
+                    break;
+            }
+            holder.txtBadge.setText(badgeLabel);
+            holder.txtBadge.setBackgroundColor(badgeCor);
 
             holder.btnEditar.setOnClickListener(v -> listener.onClick(doc));
         }

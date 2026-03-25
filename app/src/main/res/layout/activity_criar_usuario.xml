@@ -159,7 +159,7 @@
                             android:padding="14dp"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- PERFIL -->
+                    <!-- PERFIL DE ACESSO -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -170,19 +170,30 @@
                         android:letterSpacing="0.08"
                         android:layout_marginBottom="10dp"/>
 
+                    <!-- Descrição dos perfis -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="👤 Usuário — acesso básico aos conteúdos\n📋 Projeto — cria e gerencia conteúdos\n🛡 Admin — acesso total ao sistema"
+                        android:textSize="11sp"
+                        android:textColor="#81C784"
+                        android:lineSpacingExtra="4dp"
+                        android:layout_marginBottom="14dp"/>
+
+                    <!-- Botões de perfil (3 colunas) -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:layout_marginBottom="24dp">
 
-                        <!-- Botão Usuário -->
+                        <!-- Usuário -->
                         <LinearLayout
                             android:id="@+id/btnPerfilUsuario"
                             android:layout_width="0dp"
                             android:layout_height="52dp"
                             android:layout_weight="1"
-                            android:layout_marginEnd="8dp"
+                            android:layout_marginEnd="6dp"
                             android:orientation="horizontal"
                             android:gravity="center"
                             android:background="@drawable/bg_logo_circle"
@@ -192,13 +203,35 @@
                                 android:id="@+id/txtPerfilUsuario"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="👤  Usuário"
-                                android:textSize="13sp"
+                                android:text="👤 Usuário"
+                                android:textSize="12sp"
                                 android:textStyle="bold"
                                 android:textColor="#FFFFFF"/>
                         </LinearLayout>
 
-                        <!-- Botão Admin -->
+                        <!-- Projeto -->
+                        <LinearLayout
+                            android:id="@+id/btnPerfilProjeto"
+                            android:layout_width="0dp"
+                            android:layout_height="52dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="6dp"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:background="@drawable/circle_light_green"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <TextView
+                                android:id="@+id/txtPerfilProjeto"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="📋 Projeto"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:textColor="#2E7D32"/>
+                        </LinearLayout>
+
+                        <!-- Admin -->
                         <LinearLayout
                             android:id="@+id/btnPerfilAdmin"
                             android:layout_width="0dp"
@@ -213,8 +246,8 @@
                                 android:id="@+id/txtPerfilAdmin"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="🛡  Admin"
-                                android:textSize="13sp"
+                                android:text="🛡 Admin"
+                                android:textSize="12sp"
                                 android:textStyle="bold"
                                 android:textColor="#2E7D32"/>
                         </LinearLayout>
