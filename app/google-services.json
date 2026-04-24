@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "779552781322",
+    "project_id": "agentemirim-29bf5",
+    "storage_bucket": "agentemirim-29bf5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:779552781322:android:81d40882442a45fb871bf3",
+        "android_client_info": {
+          "package_name": "br.feevale.agentemirim"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSgkb5D5sbDQfl7eF-BR22fW0C92_7VaU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

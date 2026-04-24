@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <style name="Theme.AgenteMirim" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#2E7D32</item>
+        <item name="colorPrimaryVariant">#1B5E20</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#66BB6A</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="android:statusBarColor">#2E7D32</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="#FAFFFE">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="14dp">
+
+        <!-- Avatar com inicial do nome -->
+        <TextView
+            android:id="@+id/txtAvatar"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/bg_logo_circle"
+            android:layout_marginEnd="14dp"/>
+
+        <!-- Infos -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtNomeUsuario"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#1B5E20"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+
+            <TextView
+                android:id="@+id/txtEmailUsuario"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="#66BB6A"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+
+            <!-- Badge perfil -->
+            <TextView
+                android:id="@+id/txtBadgePerfil"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/bg_logo_circle"/>
+
+        </LinearLayout>
+
+        <!-- Botão editar -->
+        <ImageView
+            android:id="@+id/btnEditar"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@android:drawable/ic_menu_edit"
+            android:tint="#2E7D32"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="4dp"
+            android:contentDescription="Editar usuário"/>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
