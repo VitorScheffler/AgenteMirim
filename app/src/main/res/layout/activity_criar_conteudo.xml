@@ -142,6 +142,7 @@
                         android:background="#E8F5E9"
                         android:layout_marginBottom="20dp"/>
 
+<<<<<<< HEAD
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -176,6 +177,8 @@
                         android:background="#F1F8E9"
                         android:layout_marginBottom="24dp"/>
 
+=======
+>>>>>>> 9d4cec7867b26353fe308d7a55546f6726106f55
                     <!-- Botão publicar -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSalvar"

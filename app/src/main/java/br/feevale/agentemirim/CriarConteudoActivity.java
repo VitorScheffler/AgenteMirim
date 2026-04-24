@@ -2,16 +2,16 @@ package br.feevale.agentemirim;
 
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
-import android.widget.ProgressBar;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -33,7 +33,6 @@ public class CriarConteudoActivity extends AppCompatActivity {
     private TextInputEditText editTitulo, editDescricao;
     private MaterialButton btnSalvar;
     private ProgressBar progressBar;
-
     private Spinner spinnerCor, spinnerIcone;
 
     private final int[] cores = {
@@ -41,10 +40,10 @@ public class CriarConteudoActivity extends AppCompatActivity {
     };
 
     private final int[] icones = {
-        android.R.drawable.ic_menu_sort_by_size,
-        android.R.drawable.ic_menu_send,
-        android.R.drawable.ic_menu_help,
-        android.R.drawable.ic_menu_myplaces
+            android.R.drawable.ic_menu_sort_by_size,
+            android.R.drawable.ic_menu_send,
+            android.R.drawable.ic_menu_help,
+            android.R.drawable.ic_menu_myplaces
     };
 
     private FirebaseFirestore db;
@@ -138,13 +137,11 @@ public class CriarConteudoActivity extends AppCompatActivity {
 
         if (posCor == 0) {
             Toast.makeText(this, "Selecione uma cor", Toast.LENGTH_SHORT).show();
-            spinnerCor.requestFocus();
             return;
         }
 
         if (posIcone == 0) {
             Toast.makeText(this, "Selecione um ícone", Toast.LENGTH_SHORT).show();
-            spinnerIcone.requestFocus();
             return;
         }
 
@@ -161,7 +158,6 @@ public class CriarConteudoActivity extends AppCompatActivity {
                 .limit(1)
                 .get()
                 .addOnSuccessListener(query -> {
-
                     long proximaOrdem = 1;
 
                     if (!query.isEmpty()) {
@@ -171,13 +167,12 @@ public class CriarConteudoActivity extends AppCompatActivity {
 
                     salvarNovoConteudo(titulo, descricao, user.getUid(), proximaOrdem, corSelecionada, iconeSelecionado);
                 })
-                .addOnFailureListener(e -> {
-                    // fallback (primeiro item)
-                    salvarNovoConteudo(titulo, descricao, user.getUid(), 1, corSelecionada, iconeSelecionado);
-                });
+                .addOnFailureListener(e ->
+                        salvarNovoConteudo(titulo, descricao, user.getUid(), 1, corSelecionada, iconeSelecionado)
+                );
     }
 
-    private void salvarNovoConteudo(String titulo, String descricao, String uid, long ordem, int cor, int icone){
+    private void salvarNovoConteudo(String titulo, String descricao, String uid, long ordem, int cor, int icone) {
         String dataAtual = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 .format(new Date());
 
