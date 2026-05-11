@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -54,9 +55,31 @@ public class PerfilUsuarioActivity extends AppCompatActivity {
         bindViews();
         exibirEmailAtual();
         configurarForcaSenha();
+        configurarNavegacao();
 
         btnAlterarEmail.setOnClickListener(v -> alterarEmail());
         btnAlterarSenha.setOnClickListener(v -> alterarSenha());
+    }
+
+    private void configurarNavegacao() {
+        BottomNavigationView bottomNavigation = findViewById(R.id.bottomNavigation);
+        bottomNavigation.setSelectedItemId(R.id.navigation_perfil);
+
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.navigation_home) {
+                startActivity(new android.content.Intent(this, MainActivity.class));
+                finish();
+                return true;
+            } else if (id == R.id.navigation_conteudos) {
+                startActivity(new android.content.Intent(this, ConteudosActivity.class));
+                finish();
+                return true;
+            } else if (id == R.id.navigation_perfil) {
+                return true;
+            }
+            return false;
+        });
     }
 
     private void bindViews() {

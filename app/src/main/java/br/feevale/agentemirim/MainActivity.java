@@ -14,6 +14,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -86,6 +87,27 @@ public class MainActivity extends AppCompatActivity {
 
         // ── 👤 PopupMenu do usuário (direita) ─────────────────────────────────
         ivUsuario.setOnClickListener(this::exibirMenuUsuario);
+
+        configurarNavegacao();
+    }
+
+    private void configurarNavegacao() {
+        BottomNavigationView bottomNavigation = findViewById(R.id.bottomNavigation);
+        bottomNavigation.setSelectedItemId(R.id.navigation_home);
+
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.navigation_home) {
+                return true;
+            } else if (id == R.id.navigation_conteudos) {
+                startActivity(new Intent(this, ConteudosActivity.class));
+                return true;
+            } else if (id == R.id.navigation_perfil) {
+                startActivity(new Intent(this, PerfilUsuarioActivity.class));
+                return true;
+            }
+            return false;
+        });
     }
 
     // ── Menu usuário ──────────────────────────────────────────────────────────

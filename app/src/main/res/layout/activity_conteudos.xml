@@ -77,4 +77,15 @@
         app:elevation="6dp"
         android:visibility="gone"/>
 
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#FAFFFE"
+        app:menu="@menu/bottom_nav_menu"
+        app:itemIconTint="#2E7D32"
+        app:itemTextColor="#2E7D32"
+        app:labelVisibilityMode="labeled"/>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

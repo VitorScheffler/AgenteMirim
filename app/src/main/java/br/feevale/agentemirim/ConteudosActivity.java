@@ -16,6 +16,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -52,6 +53,29 @@ public class ConteudosActivity extends AppCompatActivity {
         fabNovoConteudo = findViewById(R.id.fabNovoConteudo);
 
         fabNovoConteudo.setVisibility(View.GONE);
+
+        configurarNavegacao();
+    }
+
+    private void configurarNavegacao() {
+        BottomNavigationView bottomNavigation = findViewById(R.id.bottomNavigation);
+        bottomNavigation.setSelectedItemId(R.id.navigation_conteudos);
+
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.navigation_home) {
+                startActivity(new Intent(this, MainActivity.class));
+                finish();
+                return true;
+            } else if (id == R.id.navigation_conteudos) {
+                return true;
+            } else if (id == R.id.navigation_perfil) {
+                startActivity(new Intent(this, PerfilUsuarioActivity.class));
+                finish();
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
