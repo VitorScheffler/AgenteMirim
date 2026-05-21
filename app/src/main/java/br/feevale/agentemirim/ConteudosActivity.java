@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -21,17 +20,28 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.List;
 
+/**
+ * Tela principal de Conteúdos.
+ * Lista as cidades cadastradas no Firestore (coleção "cidades").
+ * Admin pode adicionar novas cidades via FAB.
+ *
+ * Destino: app/src/main/java/br/feevale/agentemirim/ConteudosActivity.java
+ */
 public class ConteudosActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerConteudos;
-    private LinearLayout layoutVazio;
-    private ProgressBar progressBar;
-    private FloatingActionButton fabNovoConteudo;
+    private RecyclerView         recyclerCidades;
+    private LinearLayout         layoutVazio;
+    private ProgressBar          progressBar;
+    private FloatingActionButton fabAdicionarCidade;
+    private ImageView            ivMenu;
 
-    private FirebaseFirestore db;
+    private FirebaseFirestore    db;
+    private ListenerRegistration listenerCidades;
+    private CidadeAdapter        adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,103 +52,127 @@ public class ConteudosActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null)
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationOnClickListener(v -> finish());
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        recyclerConteudos = findViewById(R.id.recyclerConteudos);
-        layoutVazio = findViewById(R.id.layoutVazio);
-        progressBar = findViewById(R.id.progressBar);
-        fabNovoConteudo = findViewById(R.id.fabNovoConteudo);
-
-        fabNovoConteudo.setVisibility(View.GONE);
+        bindViews();
+        configurarAcoes();
+        verificarPerfil();
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        verificarPerfilECarregar();
+    protected void onStart() {
+        super.onStart();
+        if (listenerCidades == null) iniciarListener();
     }
 
-    private void verificarPerfilECarregar() {
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (listenerCidades != null) { listenerCidades.remove(); listenerCidades = null; }
+    }
+
+    private void bindViews() {
+        recyclerCidades    = findViewById(R.id.recyclerCidades);
+        layoutVazio        = findViewById(R.id.layoutVazio);
+        progressBar        = findViewById(R.id.progressBar);
+        fabAdicionarCidade = findViewById(R.id.fabAdicionarCidade);
+        ivMenu             = findViewById(R.id.ivMenu);
+
+        recyclerCidades.setLayoutManager(new LinearLayoutManager(this));
+        fabAdicionarCidade.setVisibility(View.GONE);
+        ivMenu.setVisibility(View.GONE);
+    }
+
+    private void configurarAcoes() {
+        // Card "Todas as cidades" → abre lista sem filtro de cidade
+        findViewById(R.id.cardTodasCidades).setOnClickListener(v -> {
+            Intent intent = new Intent(this, ConteudosCidadeActivity.class);
+            intent.putExtra("cidadeId", "todas");
+            intent.putExtra("cidadeNome", "Todos os conteúdos");
+            intent.putExtra("cidadeDescricao", "Conteúdos de todas as cidades disponíveis.");
+            startActivity(intent);
+        });
+
+        // Card "Minhas cidades" → placeholder por enquanto
+        findViewById(R.id.cardMinhasCidades).setOnClickListener(v -> {
+            // TODO: implementar seleção de cidades favoritas
+        });
+
+        // FAB admin → adicionar cidade
+        fabAdicionarCidade.setOnClickListener(v ->
+                startActivity(new Intent(this, CriarCidadeActivity.class)));
+
+        // Menu admin
+        ivMenu.setOnClickListener(v ->
+                startActivity(new Intent(this, GerenciarUsuariosActivity.class)));
+    }
+
+    private void verificarPerfil() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) {
-            finish();
-            return;
-        }
+        if (user == null) return;
 
-        setCarregando(true);
-
-        db.collection("usuarios").document(user.getUid())
-                .get()
+        db.collection("usuarios").document(user.getUid()).get()
                 .addOnSuccessListener(doc -> {
-
                     String perfil = doc.exists() && doc.getString("perfil") != null
                             ? doc.getString("perfil") : "usuario";
-
-                    boolean podeGerenciar = "projeto".equals(perfil) || "admin".equals(perfil);
-
-                    fabNovoConteudo.setVisibility(podeGerenciar ? View.VISIBLE : View.GONE);
-
-                    fabNovoConteudo.setOnClickListener(v ->
-                            startActivity(new Intent(this, CriarConteudoActivity.class)));
-
-                    carregarConteudos();
-                })
-                .addOnFailureListener(e -> carregarConteudos());
+                    boolean isAdmin = "admin".equals(perfil);
+                    fabAdicionarCidade.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+                    ivMenu.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+                });
     }
 
-    private void carregarConteudos() {
+    private void iniciarListener() {
         setCarregando(true);
 
-        db.collection("conteudos")
-                .orderBy("ordem")
-                .get()
-                .addOnSuccessListener(query -> {
+        listenerCidades = db.collection("cidades")
+                .orderBy("nome")
+                .addSnapshotListener((snapshot, error) -> {
                     setCarregando(false);
-
-                    List<DocumentSnapshot> docs = query.getDocuments();
-
-                    if (docs.isEmpty()) {
-                        layoutVazio.setVisibility(View.VISIBLE);
-                        recyclerConteudos.setVisibility(View.GONE);
-                        return;
+                    if (error != null || snapshot == null) {
+                        exibirVazio(); return;
                     }
-
-                    ConteudoAdapter adapter = new ConteudoAdapter(docs);
-                    recyclerConteudos.setLayoutManager(new LinearLayoutManager(this));
-                    recyclerConteudos.setAdapter(adapter);
+                    List<DocumentSnapshot> docs = snapshot.getDocuments();
+                    if (docs.isEmpty()) { exibirVazio(); return; }
 
                     layoutVazio.setVisibility(View.GONE);
-                    recyclerConteudos.setVisibility(View.VISIBLE);
-                })
-                .addOnFailureListener(e -> {
-                    setCarregando(false);
-                    layoutVazio.setVisibility(View.VISIBLE);
-                    recyclerConteudos.setVisibility(View.GONE);
+                    recyclerCidades.setVisibility(View.VISIBLE);
+                    adapter = new CidadeAdapter(docs);
+                    recyclerCidades.setAdapter(adapter);
                 });
+    }
+
+    private void exibirVazio() {
+        recyclerCidades.setVisibility(View.GONE);
+        layoutVazio.setVisibility(View.VISIBLE);
     }
 
     private void setCarregando(boolean c) {
         progressBar.setVisibility(c ? View.VISIBLE : View.GONE);
     }
 
-    // ─────────────────────────────
-    // ADAPTER FIRESTORE
-    // ─────────────────────────────
+    private void abrirCidade(DocumentSnapshot doc) {
+        Intent intent = new Intent(this, ConteudosCidadeActivity.class);
+        intent.putExtra("cidadeId",        doc.getId());
+        intent.putExtra("cidadeNome",      doc.getString("nome"));
+        intent.putExtra("cidadeDescricao", doc.getString("descricao"));
+        intent.putExtra("cidadeImagemUrl", doc.getString("imagemUrl"));
+        startActivity(intent);
+    }
 
-    static class ConteudoAdapter extends RecyclerView.Adapter<ConteudoAdapter.VH> {
+    // =========================================================================
+    // ADAPTER DE CIDADES
+    // =========================================================================
+
+    class CidadeAdapter extends RecyclerView.Adapter<CidadeAdapter.VH> {
 
         private final List<DocumentSnapshot> lista;
 
-        ConteudoAdapter(List<DocumentSnapshot> lista) {
-            this.lista = lista;
-        }
+        CidadeAdapter(List<DocumentSnapshot> lista) { this.lista = lista; }
 
         @Override
         public VH onCreateViewHolder(ViewGroup parent, int viewType) {
             View v = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_conteudo, parent, false);
+                    .inflate(R.layout.item_cidade, parent, false);
             return new VH(v);
         }
 
@@ -146,44 +180,58 @@ public class ConteudosActivity extends AppCompatActivity {
         public void onBindViewHolder(VH holder, int position) {
             DocumentSnapshot doc = lista.get(position);
 
-            holder.txtTitulo.setText(doc.getString("titulo"));
-            holder.txtDescricao.setText(doc.getString("descricao"));
-            holder.txtData.setText(doc.getString("data"));
+            String nome      = doc.getString("nome")     != null ? doc.getString("nome")     : "";
+            String imagemUrl = doc.getString("imagemUrl");
+            Long   qtd       = doc.getLong("qtdConteudos");
 
-            Long cor = doc.getLong("cor");
-            Long icone = doc.getLong("icone");
+            holder.txtNome.setText(nome);
+            holder.txtQtd.setText((qtd != null ? qtd : 0) + " conteúdos disponíveis");
 
-            holder.ivIcone.setImageResource(
-                    icone != null ? icone.intValue() : android.R.drawable.ic_menu_help
-            );
+            // Carrega imagem da cidade
+            if (imagemUrl != null && !imagemUrl.isEmpty()) {
+                carregarImagemUrl(holder.ivThumb, imagemUrl);
+            } else {
+                // Cor de fundo baseada na posição
+                int[] cores = {0xFF2E7D32, 0xFF1565C0, 0xFFE65100, 0xFF7B1FA2, 0xFF37474F};
+                holder.ivThumb.setBackgroundColor(cores[position % cores.length]);
+                holder.ivThumb.setImageResource(android.R.drawable.ic_dialog_map);
+                holder.ivThumb.setColorFilter(0x44FFFFFF);
+            }
 
-            android.graphics.drawable.GradientDrawable shape = new android.graphics.drawable.GradientDrawable();
-            shape.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
-            shape.setCornerRadius(32f);
-            shape.setColor(cor != null ? cor.intValue() : 0xFFE87722);
-
-            holder.frameIcone.setBackground(shape);
+            holder.itemView.setOnClickListener(v -> abrirCidade(doc));
         }
 
-        @Override
-        public int getItemCount() {
-            return lista.size();
-        }
+        @Override public int getItemCount() { return lista.size(); }
 
-        static class VH extends RecyclerView.ViewHolder {
-
-            TextView txtTitulo, txtDescricao, txtData;
-            FrameLayout frameIcone;
-            ImageView ivIcone;
-
+        class VH extends RecyclerView.ViewHolder {
+            TextView  txtNome, txtQtd;
+            ImageView ivThumb;
             VH(View v) {
                 super(v);
-                txtTitulo = v.findViewById(R.id.txtTitulo);
-                txtDescricao = v.findViewById(R.id.txtDescricao);
-                txtData = v.findViewById(R.id.txtData);
-                frameIcone = v.findViewById(R.id.frameIcone);
-                ivIcone = v.findViewById(R.id.ivIcone);
+                txtNome  = v.findViewById(R.id.txtNomeCidade);
+                txtQtd   = v.findViewById(R.id.txtQtdConteudos);
+                ivThumb  = v.findViewById(R.id.ivCidadeThumb);
             }
         }
+    }
+
+    /**
+     * Carrega imagem via URL simples sem biblioteca externa.
+     * Para produção, use Glide ou Picasso adicionando no build.gradle.
+     */
+    private void carregarImagemUrl(ImageView iv, String url) {
+        // Carregamento via thread simples
+        new Thread(() -> {
+            try {
+                java.net.URL imgUrl = new java.net.URL(url);
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) imgUrl.openConnection();
+                conn.setRequestProperty("ngrok-skip-browser-warning", "true");
+                conn.connect();
+                android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(conn.getInputStream());
+                runOnUiThread(() -> {
+                    if (bmp != null) iv.setImageBitmap(bmp);
+                });
+            } catch (Exception ignored) {}
+        }).start();
     }
 }

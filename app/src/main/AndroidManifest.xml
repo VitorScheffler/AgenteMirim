@@ -67,6 +67,31 @@
             android:exported="false"
             android:screenOrientation="portrait"/>
 
+        <!-- Tela de lista de conteúdos de uma cidade -->
+        <activity
+            android:name=".ConteudosCidadeActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+
+        <!-- Tela de criar cidade (admin) -->
+        <activity
+            android:name=".CriarCidadeActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+
+        <!-- Tela de detalhe do conteúdo -->
+        <activity
+            android:name=".DetalheConteudoActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+
+        <!-- Tela de criar conteúdo -->
+        <activity
+            android:name=".CriarConteudoActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+
+
     </application>
 
 </manifest>

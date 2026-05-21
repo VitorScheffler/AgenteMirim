@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    activity_conteudos_cidade.xml — NOVO
+    Tela que abre ao clicar numa cidade — lista os conteúdos daquela cidade
+    Destino: app/src/main/res/layout/activity_conteudos_cidade.xml
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F7F5">
+
+    <!-- ── Imagem de capa da cidade (hero) ── -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+
+        <ImageView
+            android:id="@+id/ivCapaCidade"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@android:drawable/ic_dialog_map"/>
+
+        <!-- Gradiente escuro na parte inferior -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/bg_gradient_bottom"/>
+
+        <!-- Botão voltar -->
+        <ImageView
+            android:id="@+id/btnVoltar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="12dp"
+            android:src="@android:drawable/ic_media_previous"
+            android:tint="#FFFFFF"
+            android:background="@drawable/bg_btn_voltar"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:contentDescription="Voltar"/>
+
+        <!-- Botão filtrar (direito) -->
+        <LinearLayout
+            android:id="@+id/btnFiltrar"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="12dp"
+            android:background="@drawable/bg_btn_filtrar"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@android:drawable/ic_menu_sort_by_size"
+                android:tint="#FFFFFF"
+                android:layout_marginEnd="5dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Filtrar"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"/>
+
+        </LinearLayout>
+
+        <!-- Nome e subtítulo da cidade -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/txtNomeCidadeTitulo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gramado"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Conteúdos da cidade"
+                android:textSize="13sp"
+                android:textColor="#C8E6C9"/>
+
+        </LinearLayout>
+
+        <!-- Brasão/logo da cidade (canto inferior direito) -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            app:cardCornerRadius="26dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#FFFFFF">
+
+            <ImageView
+                android:id="@+id/ivBrasaoCidade"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_dialog_map"
+                android:scaleType="fitCenter"/>
+
+        </androidx.cardview.widget.CardView>
+
+    </FrameLayout>
+
+    <!-- ── Descrição da cidade ── -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="10dp">
+
+        <TextView
+            android:id="@+id/txtDescricaoCidade"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Explore informações, dicas e orientações sobre prevenção de desastres e segurança."
+            android:textSize="13sp"
+            android:textColor="#555555"
+            android:lineSpacingExtra="3dp"/>
+
+    </LinearLayout>
+
+    <!-- ── Chips de categoria ── -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:layout_marginBottom="10dp">
+
+        <LinearLayout
+            android:id="@+id/layoutChipsCategorias"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"/>
+
+    </HorizontalScrollView>
+
+    <!-- ── Lista de conteúdos ── -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerConteudos"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="80dp"
+        android:nestedScrollingEnabled="false"/>
+
+    <!-- Estado vazio -->
+    <LinearLayout
+        android:id="@+id/layoutVazio"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@android:drawable/ic_menu_agenda"
+            android:alpha="0.2"/>
+
+        <TextView
+            android:tag="txtVazio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nenhum conteúdo disponível"
+            android:textSize="14sp"
+            android:textColor="#BDBDBD"
+            android:layout_marginTop="12dp"/>
+
+    </LinearLayout>
+
+    <!-- ProgressBar -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"
+        android:indeterminateTint="#2E7D32"/>
+
+    <!-- FAB: novo conteúdo (projeto/admin) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabNovoConteudo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
+        android:src="@android:drawable/ic_input_add"
+        android:contentDescription="Novo conteúdo"
+        app:backgroundTint="#2E7D32"
+        app:tint="#FFFFFF"
+        app:elevation="8dp"
+        android:visibility="gone"/>
+
+</LinearLayout>

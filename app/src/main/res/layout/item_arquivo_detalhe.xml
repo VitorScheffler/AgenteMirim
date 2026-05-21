@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    item_arquivo_detalhe.xml
+    Destino: app/src/main/res/layout/item_arquivo_detalhe.xml
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="14dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?attr/selectableItemBackground">
+
+    <!-- Chip do tipo -->
+    <TextView
+        android:id="@+id/txtTipoChip"
+        android:layout_width="44dp"
+        android:layout_height="24dp"
+        android:gravity="center"
+        android:text="PDF"
+        android:textSize="9sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/bg_chip_arquivo"
+        android:layout_marginEnd="14dp"/>
+
+    <!-- Nome do arquivo -->
+    <TextView
+        android:id="@+id/txtNomeArquivo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Guia completo.pdf"
+        android:textSize="13sp"
+        android:textColor="#1A1A1A"
+        android:maxLines="1"
+        android:ellipsize="middle"/>
+
+    <!-- Tamanho -->
+    <TextView
+        android:id="@+id/txtTamanho"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2.4 MB"
+        android:textSize="11sp"
+        android:textColor="#9E9E9E"
+        android:layout_marginHorizontal="10dp"/>
+
+    <!-- Botão download -->
+    <ImageView
+        android:id="@+id/btnDownload"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:src="@android:drawable/stat_sys_download"
+        android:tint="#2E7D32"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="5dp"
+        android:contentDescription="Baixar"/>
+
+</LinearLayout>

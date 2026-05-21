@@ -1,40 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    activity_criar_conteudo.xml
+    Destino: app/src/main/res/layout/activity_criar_conteudo.xml
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#E8F5E9">
+    android:background="#F5F7F5">
 
-    <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:paddingTop="24dp"
+        android:layout_height="64dp"
         android:background="#2E7D32"
         app:titleTextColor="#FFFFFF"
-        app:title="Novo Conteúdo"/>
+        app:title="Criar conteúdo"/>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingBottom="32dp">
+        android:clipToPadding="false">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:paddingBottom="32dp">
 
+            <!-- ── Card: Informações básicas ── -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="#FAFFFE">
+                app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -42,168 +46,378 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <!-- Badge perfil -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="📋  PERFIL PROJETO"
-                        android:textSize="10sp"
-                        android:textColor="#1565C0"
+                        android:text="Informações básicas"
+                        android:textSize="14sp"
                         android:textStyle="bold"
-                        android:letterSpacing="0.08"
-                        android:layout_marginBottom="4dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="DADOS DO CONTEÚDO"
-                        android:textSize="11sp"
-                        android:textColor="#388E3C"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08"
-                        android:layout_marginBottom="20dp"/>
-
-                    <!-- TÍTULO -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="TÍTULO"
-                        android:textSize="10sp"
-                        android:textColor="#388E3C"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08"
-                        android:layout_marginBottom="6dp"/>
+                        android:textColor="#1B5E20"
+                        android:layout_marginBottom="16dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/layoutTitulo"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
+                        android:layout_marginBottom="12dp"
+                        android:hint="Título do conteúdo *"
                         app:boxCornerRadiusTopStart="12dp"
                         app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusBottomStart="12dp"
                         app:boxCornerRadiusBottomEnd="12dp"
                         app:boxStrokeColor="#C8E6C9"
-                        app:boxBackgroundColor="#F1F8E9">
+                        app:boxBackgroundColor="#F9FBF9">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editTitulo"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Ex: Educação Financeira"
+                            android:hint="Ex: Como agir em caso de enchentes"
                             android:inputType="textCapSentences"
-                            android:textColor="#2E7D32"
-                            android:textColorHint="#A5D6A7"
+                            android:textColor="#1A1A1A"
+                            android:textColorHint="#BDBDBD"
                             android:textSize="14sp"
                             android:padding="14dp"/>
                     </com.google.android.material.textfield.TextInputLayout>
-
-                    <!-- DESCRIÇÃO -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="DESCRIÇÃO"
-                        android:textSize="10sp"
-                        android:textColor="#388E3C"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08"
-                        android:layout_marginBottom="6dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/layoutDescricao"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="24dp"
+                        android:hint="Descrição *"
                         app:boxCornerRadiusTopStart="12dp"
                         app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusBottomStart="12dp"
                         app:boxCornerRadiusBottomEnd="12dp"
                         app:boxStrokeColor="#C8E6C9"
-                        app:boxBackgroundColor="#F1F8E9">
+                        app:boxBackgroundColor="#F9FBF9"
+                        app:counterEnabled="true"
+                        app:counterMaxLength="500">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editDescricao"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Descreva brevemente o conteúdo..."
+                            android:hint="Descreva o conteúdo que será compartilhado..."
                             android:inputType="textMultiLine|textCapSentences"
                             android:minLines="3"
                             android:gravity="top"
-                            android:textColor="#2E7D32"
-                            android:textColorHint="#A5D6A7"
+                            android:textColor="#1A1A1A"
+                            android:textColorHint="#BDBDBD"
                             android:textSize="14sp"
-                            android:padding="14dp"/>
+                            android:padding="14dp"
+                            android:maxLength="500"/>
                     </com.google.android.material.textfield.TextInputLayout>
-
-                    <!-- Divisória -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#E8F5E9"
-                        android:layout_marginBottom="20dp"/>
-
-<<<<<<< HEAD
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="COR"
-                        android:textSize="10sp"
-                        android:textColor="#388E3C"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08"
-                        android:layout_marginBottom="6dp"/>
-
-                    <Spinner
-                        android:id="@+id/spinnerCor"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:background="#F1F8E9"
-                        android:layout_marginBottom="16dp"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="ÍCONE"
-                        android:textSize="10sp"
-                        android:textColor="#388E3C"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08"
-                        android:layout_marginBottom="6dp"/>
-
-                    <Spinner
-                        android:id="@+id/spinnerIcone"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:background="#F1F8E9"
-                        android:layout_marginBottom="24dp"/>
-
-=======
->>>>>>> 9d4cec7867b26353fe308d7a55546f6726106f55
-                    <!-- Botão publicar -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSalvar"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:text="PUBLICAR CONTEÚDO"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
-                        android:textSize="14sp"
-                        android:letterSpacing="0.08"
-                        app:backgroundTint="#2E7D32"
-                        app:cornerRadius="14dp"
-                        app:elevation="4dp"/>
-
-                    <ProgressBar
-                        android:id="@+id/progressBar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="12dp"
-                        android:visibility="gone"
-                        android:indeterminateTint="#2E7D32"/>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <!-- ── Card: Tipo de conteúdo ── -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tipo de conteúdo *"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#1B5E20"
+                        android:layout_marginBottom="14dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:id="@+id/btnTipoDica"
+                            android:layout_width="0dp"
+                            android:layout_height="72dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="@drawable/bg_tipo_ativo"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <ImageView android:layout_width="24dp" android:layout_height="24dp"
+                                android:src="@android:drawable/ic_menu_help" android:tint="#2E7D32"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Dica" android:textSize="11sp" android:textStyle="bold"
+                                android:textColor="#2E7D32" android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/btnTipoVideo"
+                            android:layout_width="0dp"
+                            android:layout_height="72dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="@drawable/bg_tipo_inativo"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <ImageView android:layout_width="24dp" android:layout_height="24dp"
+                                android:src="@android:drawable/ic_media_play" android:tint="#9E9E9E"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Vídeo" android:textSize="11sp" android:textColor="#9E9E9E"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/btnTipoNoticia"
+                            android:layout_width="0dp"
+                            android:layout_height="72dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="@drawable/bg_tipo_inativo"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <ImageView android:layout_width="24dp" android:layout_height="24dp"
+                                android:src="@android:drawable/ic_menu_send" android:tint="#9E9E9E"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Notícia" android:textSize="11sp" android:textColor="#9E9E9E"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/btnTipoOutro"
+                            android:layout_width="0dp"
+                            android:layout_height="72dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="@drawable/bg_tipo_inativo"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <ImageView android:layout_width="24dp" android:layout_height="24dp"
+                                android:src="@android:drawable/ic_menu_more" android:tint="#9E9E9E"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Outro" android:textSize="11sp" android:textColor="#9E9E9E"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ── Card: Imagem de capa ── -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Imagem de capa (opcional)"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#1B5E20"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Aparece no topo da tela de detalhe do conteúdo"
+                        android:textSize="12sp"
+                        android:textColor="#9E9E9E"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- Preview da capa -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="120dp"
+                        android:layout_marginBottom="8dp"
+                        android:visibility="gone"
+                        android:id="@+id/cardPreviewCapa"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp">
+                        <ImageView
+                            android:id="@+id/ivPreviewCapa"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:visibility="gone"/>
+                    </androidx.cardview.widget.CardView>
+
+                    <TextView
+                        android:id="@+id/txtNomeCapa"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="#2E7D32"
+                        android:layout_marginBottom="8dp"
+                        android:visibility="gone"/>
+
+                    <!-- Área upload capa -->
+                    <LinearLayout
+                        android:id="@+id/layoutUploadCapa"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:background="@drawable/bg_upload_area"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_camera"
+                            android:tint="#2E7D32"
+                            android:alpha="0.6"
+                            android:layout_marginBottom="6dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Toque para selecionar imagem de capa"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:textColor="#388E3C"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ── Card: Arquivos e materiais ── -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Arquivos e materiais (opcional)"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#1B5E20"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PDF, MP4, JPG, PNG e outros"
+                        android:textSize="12sp"
+                        android:textColor="#9E9E9E"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- Arquivo selecionado -->
+                    <LinearLayout
+                        android:id="@+id/layoutArquivosSelecionados"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- Área upload arquivo -->
+                    <LinearLayout
+                        android:id="@+id/layoutUploadArquivo"
+                        android:layout_width="match_parent"
+                        android:layout_height="90dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:background="@drawable/bg_upload_area"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:src="@android:drawable/ic_menu_upload"
+                            android:tint="#2E7D32"
+                            android:alpha="0.6"
+                            android:layout_marginBottom="6dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Toque para selecionar arquivo"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="#388E3C"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="PDF, MP4, JPG, PNG e outros (máx. 50MB)"
+                            android:textSize="11sp"
+                            android:textColor="#A5D6A7"
+                            android:layout_marginTop="2dp"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Botão publicar -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSalvar"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="☁  Publicar conteúdo"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                app:backgroundTint="#2E7D32"
+                app:cornerRadius="16dp"
+                app:elevation="4dp"/>
+
+            <TextView
+                android:id="@+id/txtProgresso"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:textSize="12sp"
+                android:textColor="#66BB6A"
+                android:visibility="gone"/>
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="6dp"
+                android:visibility="gone"
+                android:indeterminateTint="#2E7D32"/>
 
         </LinearLayout>
     </ScrollView>
