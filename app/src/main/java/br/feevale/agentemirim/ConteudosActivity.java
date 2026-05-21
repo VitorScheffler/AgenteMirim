@@ -59,6 +59,13 @@ public class ConteudosActivity extends AppCompatActivity {
 
     private void configurarNavegacao() {
         BottomNavigationView bottomNavigation = findViewById(R.id.bottomNavigation);
+
+        // VERIFICAÇÃO PARA ESCONDER O PERFIL QUANDO FOR BENEFICIADO
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.isAnonymous()) {
+            bottomNavigation.getMenu().findItem(R.id.navigation_perfil).setVisible(false);
+        }
+
         bottomNavigation.setSelectedItemId(R.id.navigation_conteudos);
 
         bottomNavigation.setOnItemSelectedListener(item -> {

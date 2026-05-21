@@ -191,6 +191,18 @@
                 app:cornerRadius="14dp"
                 app:elevation="4dp"/>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnBeneficiado"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="8dp"
+                android:text="ACESSAR COMO BENEFICIADO"
+                android:textColor="#2E7D32"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                app:cornerRadius="14dp" />
+
             <!-- Loading enquanto autentica no Firebase -->
             <ProgressBar
                 android:id="@+id/progressBar"

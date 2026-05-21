@@ -51,10 +51,15 @@ public class MainActivity extends AppCompatActivity {
             db.collection("usuarios").document(user.getUid())
                     .get()
                     .addOnSuccessListener(doc -> {
+                        String perfil = doc.exists() && doc.getString("perfil") != null
+                                ? doc.getString("perfil") : "usuario";
+
                         // Boas-vindas com primeiro nome
                         String nome = doc.getString("nome");
                         if (nome != null && !nome.isEmpty()) {
                             txtBoasVindas.setText("Bem-vindo, " + nome.split(" ")[0] + "!");
+                        } else {
+                            txtBoasVindas.setText("Bem-vindo, Beneficiado!");
                         }
 
                         // Exibe o ☰ somente para admins
@@ -93,6 +98,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void configurarNavegacao() {
         BottomNavigationView bottomNavigation = findViewById(R.id.bottomNavigation);
+
+        // VERIFICAÇÃO PARA ESCONDER O PERFIL QUANDO FOR BENEFICIADO
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.isAnonymous()) {
+            bottomNavigation.getMenu().findItem(R.id.navigation_perfil).setVisible(false);
+        }
+
         bottomNavigation.setSelectedItemId(R.id.navigation_home);
 
         bottomNavigation.setOnItemSelectedListener(item -> {
@@ -115,6 +127,11 @@ public class MainActivity extends AppCompatActivity {
     private void exibirMenuUsuario(View anchorView) {
         PopupMenu popup = new PopupMenu(this, anchorView);
         popup.getMenuInflater().inflate(R.menu.menu_usuario, popup.getMenu());
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.isAnonymous()) {
+            popup.getMenu().findItem(R.id.action_perfil).setVisible(false);
+        }
 
         popup.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();

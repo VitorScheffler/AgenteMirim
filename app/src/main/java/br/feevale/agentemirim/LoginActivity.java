@@ -48,6 +48,10 @@ public class LoginActivity extends AppCompatActivity {
         txtEsqueciSenha.setOnClickListener(v ->
                 startActivity(new Intent(this, RecuperarSenhaActivity.class)));
 
+        MaterialButton btnBeneficiado = findViewById(R.id.btnBeneficiado);
+        btnBeneficiado.setOnClickListener(v -> acessarComoBeneficiado());
+
+
         // Bloqueia gesto de voltar na tela de login
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -95,6 +99,11 @@ public class LoginActivity extends AppCompatActivity {
     private void verificarPerfil(FirebaseUser user) {
         if (user == null) { setCarregando(false); return; }
 
+        if (user.isAnonymous()) {
+            irPara(MainActivity.class);
+            return;
+        }
+
         setCarregando(true);
 
         db.collection("usuarios").document(user.getUid())
@@ -118,6 +127,19 @@ public class LoginActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+    private void acessarComoBeneficiado() {
+        setCarregando(true);
+        mAuth.signInAnonymously()
+                .addOnSuccessListener(result -> {
+                    setCarregando(false);
+                    irPara(MainActivity.class);
+                })
+                .addOnFailureListener(e -> {
+                    setCarregando(false);
+                    // Opcional: mostrar um Toast ou erro no layout
+                    layoutSenha.setError("Erro ao acessar como beneficiado");
+                });
     }
 
     private void setCarregando(boolean c) {
