@@ -481,7 +481,7 @@ public class DetalheConteudoActivity extends AppCompatActivity {
 
     private void confirmarApagar() {
         new AlertDialog.Builder(this)
-                .setTitle("🗑 Apagar conteúdo")
+                .setTitle("Apagar conteúdo")
                 .setMessage("Tem certeza? Esta ação não pode ser desfeita."
                         + (arquivoId != null ? "\n\nO arquivo anexado também será removido." : ""))
                 .setPositiveButton("Apagar", (d, w) -> apagarConteudo())

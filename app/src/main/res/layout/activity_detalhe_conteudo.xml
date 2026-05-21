@@ -8,7 +8,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F7F5">
+    android:background="#F5F7F5"
+    android:fitsSystemWindows="true">
 
     <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
@@ -297,7 +298,7 @@
                         android:layout_height="48dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
-                        android:text="✏  Editar"
+                        android:text="Editar"
                         android:textColor="#2E7D32"
                         android:textStyle="bold"
                         android:textSize="13sp"

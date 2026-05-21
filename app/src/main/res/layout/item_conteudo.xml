@@ -1,97 +1,176 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    item_conteudo.xml — REDESENHADO
+    Destino: app/src/main/res/layout/item_conteudo.xml
+
+    Drawables necessários:
+      bg_thumb_conteudo   → ShapeDrawable circular/arredondado com cor dinâmica (setBackgroundTintList no adapter)
+      bg_badge_tipo       → ShapeDrawable rect com cornerRadius 6dp (cor dinâmica no adapter)
+      bg_meta_tag         → ShapeDrawable rect com cornerRadius 4dp, cor #F5F5F5
+      bg_bookmark         → ShapeDrawable rect com cornerRadius 8dp, cor #F1F8E9
+
+    No adapter, defina a cor de fundo do ivThumb e do txtBadge
+    conforme o tipo de conteúdo:
+      DICA        → thumb #E8F5E9 / ícone tint #2E7D32 / badge bg #E8F5E9 texto #2E7D32
+      VÍDEO       → thumb #E3F2FD / ícone tint #1565C0 / badge bg #E3F2FD texto #1565C0
+      NOTÍCIA     → thumb #FFF3E0 / ícone tint #E65100 / badge bg #FFF3E0 texto #E65100
+      INFOGRÁFICO → thumb #F3E5F5 / ícone tint #6A1B9A / badge bg #F3E5F5 texto #6A1B9A
+-->
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
-    android:layout_marginBottom="12dp"
+    android:layout_marginHorizontal="14dp"
+    android:layout_marginBottom="10dp"
     app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
+    app:cardElevation="1dp"
     app:cardBackgroundColor="#FFFFFF">
 
+    <!-- Ripple de toque -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="16dp">
+        android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
 
-        <!-- Ícone colorido -->
+        <!-- ── Thumbnail colorido (88 × match_parent) ── -->
         <FrameLayout
-            android:id="@+id/frameIcone"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:layout_marginEnd="16dp"
-            android:background="@drawable/bg_icone_conteudo">
+            android:id="@+id/frameThumb"
+            android:layout_width="88dp"
+            android:layout_height="match_parent"
+            android:minHeight="90dp"
+            android:background="#C8E6C9">
 
             <ImageView
-                android:id="@+id/ivIcone"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:id="@+id/ivThumb"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:layout_gravity="center"
                 android:src="@android:drawable/ic_menu_agenda"
-                android:tint="#FFFFFF"
+                android:tint="#2E7D32"
                 android:scaleType="fitCenter"/>
 
         </FrameLayout>
 
-        <!-- Textos -->
+        <!-- ── Corpo do card ── -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="11dp">
 
-            <LinearLayout
+            <!-- Badge de tipo (DICA / VÍDEO / NOTÍCIA…) -->
+            <TextView
+                android:id="@+id/txtBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DICA"
+                android:textSize="9.5sp"
+                android:textStyle="bold"
+                android:textColor="#2E7D32"
+                android:letterSpacing="0.06"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:background="@drawable/bg_badge_tipo"
+                android:layout_marginBottom="5dp"/>
+
+            <!-- Título do conteúdo -->
+            <TextView
+                android:id="@+id/txtTitulo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:textSize="13.5sp"
+                android:textStyle="bold"
+                android:textColor="#1B3A1E"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:lineSpacingMultiplier="1.25"/>
 
-                <TextView
-                    android:id="@+id/txtTitulo"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:textColor="#1B5E20"
-                    android:maxLines="1"
-                    android:ellipsize="end"/>
-
-                <!-- Badge / Toggle (opcional) -->
-                <TextView
-                    android:id="@+id/txtBadge"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="2dp"
-                    android:textSize="9sp"
-                    android:textStyle="bold"
-                    android:textColor="#FFFFFF"
-                    android:background="@drawable/bg_logo_circle"/>
-
-            </LinearLayout>
-
+            <!-- Descrição curta (opcional) -->
             <TextView
                 android:id="@+id/txtDescricao"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
                 android:textColor="#66BB6A"
-                android:maxLines="2"
+                android:maxLines="1"
                 android:ellipsize="end"
-                android:layout_marginTop="2dp"/>
+                android:layout_marginTop="2dp"
+                android:visibility="gone"/>
 
-            <TextView
-                android:id="@+id/txtData"
-                android:layout_width="wrap_content"
+            <!-- ── Metadados: formato + leitura + data + bookmark ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="11sp"
-                android:textColor="#A5D6A7"
-                android:layout_marginTop="6dp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <!-- Tag de formato (PDF / MP4 / PNG…) -->
+                <TextView
+                    android:id="@+id/txtFormato"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PDF"
+                    android:textSize="9.5sp"
+                    android:textStyle="bold"
+                    android:textColor="#546E7A"
+                    android:letterSpacing="0.04"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp"
+                    android:background="@drawable/bg_meta_tag"/>
+
+                <!-- Tempo de leitura/visualização -->
+                <TextView
+                    android:id="@+id/txtTempoLeitura"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5 min"
+                    android:textSize="10.5sp"
+                    android:textColor="#78909C"
+                    android:fontFamily="sans-serif-medium"
+                    android:drawablePadding="3dp"
+                    android:layout_marginStart="7dp"/>
+
+                <!-- Data de publicação -->
+                <TextView
+                    android:id="@+id/txtData"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="20/05/2024"
+                    android:textSize="10.5sp"
+                    android:textColor="#90A4AE"
+                    android:layout_marginStart="7dp"/>
+
+                <!-- Botão bookmark -->
+                <FrameLayout
+                    android:id="@+id/btnBookmark"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@drawable/bg_bookmark"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Salvar conteúdo"
+                    android:foreground="?attr/selectableItemBackgroundBorderless">
+
+                    <ImageView
+                        android:id="@+id/ivBookmark"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center"
+                        android:src="@android:drawable/btn_star_big_off"
+                        android:tint="#43A047"
+                        android:scaleType="fitCenter"/>
+
+                </FrameLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
 

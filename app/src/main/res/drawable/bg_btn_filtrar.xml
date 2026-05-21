@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- app/src/main/res/drawable/bg_btn_filtrar.xml
+     Pill translúcido branco para o botão "Filtrar" no hero -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#44000000"/>
-    <corners android:radius="18dp"/>
+
+    <corners android:radius="20dp"/>
+    <solid android:color="#2AFFFFFF"/>
+    <stroke
+        android:width="1dp"
+        android:color="#4DFFFFFF"/>
+
 </shape>

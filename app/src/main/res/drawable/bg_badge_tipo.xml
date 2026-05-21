@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- app/src/main/res/drawable/bg_badge_tipo.xml
+     Fundo arredondado para o badge de tipo de conteúdo (DICA, VÍDEO…)
+     A cor é aplicada dinamicamente no adapter via
+     txtBadge.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E8F5E9")) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <corners android:radius="6dp"/>
+    <solid android:color="#E8F5E9"/>
+
+</shape>

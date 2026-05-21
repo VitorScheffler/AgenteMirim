@@ -12,8 +12,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,12 +31,6 @@ import com.google.firebase.firestore.Query;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Tela de conteúdos de uma cidade específica.
- * Recebe via Intent: cidadeId, cidadeNome, cidadeDescricao, cidadeImagemUrl
- *
- * Destino: app/src/main/java/br/feevale/agentemirim/ConteudosCidadeActivity.java
- */
 public class ConteudosCidadeActivity extends AppCompatActivity {
 
     // ── Views ─────────────────────────────────────────────────────────────────
@@ -45,10 +42,12 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
     private LinearLayout         layoutVazio;
     private ProgressBar          progressBar;
     private FloatingActionButton fabNovoConteudo;
+    private View                 btnMenuAdmin;   // ⋮ botão de opções admin
 
     // ── Dados ─────────────────────────────────────────────────────────────────
-    private String cidadeId, cidadeNome, cidadeImagemUrl;
+    private String cidadeId, cidadeNome, cidadeDescricao, cidadeImagemUrl;
     private String categoriaAtiva = "todos";
+    private boolean isAdmin = false;
 
     // ── Firebase ──────────────────────────────────────────────────────────────
     private FirebaseFirestore    db;
@@ -56,8 +55,8 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
     private ConteudoCidadeAdapter adapter;
 
     // ── Categorias ────────────────────────────────────────────────────────────
-    private static final String[] CATEGORIAS     = {"todos", "dica", "video", "noticia", "material"};
-    private static final String[] CATEGORIAS_LABEL = {"Todos", "Enchentes", "Deslizamentos", "Tempestades", "Outros"};
+    private static final String[] CATEGORIAS       = {"todos","dica","video","noticia","material"};
+    private static final String[] CATEGORIAS_LABEL = {"Todos","Enchentes","Deslizamentos","Tempestades","Outros"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,21 +65,18 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
-        cidadeId       = getIntent().getStringExtra("cidadeId");
-        cidadeNome     = getIntent().getStringExtra("cidadeNome");
-        cidadeImagemUrl= getIntent().getStringExtra("cidadeImagemUrl");
-        String cidadeDescricao = getIntent().getStringExtra("cidadeDescricao");
+        cidadeId        = getIntent().getStringExtra("cidadeId");
+        cidadeNome      = getIntent().getStringExtra("cidadeNome");
+        cidadeImagemUrl = getIntent().getStringExtra("cidadeImagemUrl");
+        cidadeDescricao = getIntent().getStringExtra("cidadeDescricao");
 
         bindViews();
 
-        // Voltar
         findViewById(R.id.btnVoltar).setOnClickListener(v -> finish());
 
-        // Preenche cabeçalho
-        txtNomeCidadeTitulo.setText(cidadeNome != null ? cidadeNome : "");
+        txtNomeCidadeTitulo.setText(cidadeNome     != null ? cidadeNome     : "");
         txtDescricaoCidade.setText(cidadeDescricao != null ? cidadeDescricao : "");
 
-        // Imagem da cidade
         if (cidadeImagemUrl != null && !cidadeImagemUrl.isEmpty()) {
             carregarImagem(ivCapaCidade, cidadeImagemUrl);
         }
@@ -97,15 +93,18 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
     }
 
     private void bindViews() {
-        ivCapaCidade         = findViewById(R.id.ivCapaCidade);
-        txtNomeCidadeTitulo  = findViewById(R.id.txtNomeCidadeTitulo);
-        txtDescricaoCidade   = findViewById(R.id.txtDescricaoCidade);
-        layoutChipsCategorias= findViewById(R.id.layoutChipsCategorias);
-        recyclerConteudos    = findViewById(R.id.recyclerConteudos);
-        layoutVazio          = findViewById(R.id.layoutVazio);
-        progressBar          = findViewById(R.id.progressBar);
-        fabNovoConteudo      = findViewById(R.id.fabNovoConteudo);
+        ivCapaCidade          = findViewById(R.id.ivCapaCidade);
+        txtNomeCidadeTitulo   = findViewById(R.id.txtNomeCidadeTitulo);
+        txtDescricaoCidade    = findViewById(R.id.txtDescricaoCidade);
+        layoutChipsCategorias = findViewById(R.id.layoutChipsCategorias);
+        recyclerConteudos     = findViewById(R.id.recyclerConteudos);
+        layoutVazio           = findViewById(R.id.layoutVazio);
+        progressBar           = findViewById(R.id.progressBar);
+        fabNovoConteudo       = findViewById(R.id.fabNovoConteudo);
+        btnMenuAdmin          = findViewById(R.id.btnMenuAdmin);
+
         fabNovoConteudo.setVisibility(View.GONE);
+        btnMenuAdmin.setVisibility(View.GONE);
         recyclerConteudos.setLayoutManager(new LinearLayoutManager(this));
     }
 
@@ -127,8 +126,7 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
     private TextView criarChip(String label, boolean ativo) {
         TextView tv = new TextView(this);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.setMarginEnd(dp(8));
         tv.setLayoutParams(lp);
         tv.setPadding(dp(14), dp(7), dp(14), dp(7));
@@ -159,7 +157,6 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
 
     private void selecionarCategoria(String cat) {
         categoriaAtiva = cat;
-        // Reaplica visual de todos os chips
         for (int i = 0; i < layoutChipsCategorias.getChildCount(); i++) {
             View child = layoutChipsCategorias.getChildAt(i);
             if (child instanceof TextView) {
@@ -170,7 +167,7 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
     }
 
     // =========================================================================
-    // PERFIL
+    // PERFIL — exibe controles admin se necessário
     // =========================================================================
 
     private void verificarPerfil() {
@@ -182,6 +179,9 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
                     String perfil = doc.exists() && doc.getString("perfil") != null
                             ? doc.getString("perfil") : "usuario";
                     boolean podeGerenciar = "projeto".equals(perfil) || "admin".equals(perfil);
+                    isAdmin = "admin".equals(perfil);
+
+                    // FAB: novo conteúdo
                     fabNovoConteudo.setVisibility(podeGerenciar ? View.VISIBLE : View.GONE);
                     fabNovoConteudo.setOnClickListener(v -> {
                         Intent intent = new Intent(this, CriarConteudoActivity.class);
@@ -189,41 +189,118 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
                         intent.putExtra("cidadeNome", cidadeNome);
                         startActivity(intent);
                     });
+
+                    // ⋮ Menu admin (editar/apagar cidade) — só para admin
+                    btnMenuAdmin.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+                    btnMenuAdmin.setOnClickListener(this::exibirMenuAdmin);
                 });
     }
 
     // =========================================================================
-    // LISTENER
+    // MENU ADMIN — Editar / Apagar cidade
+    // =========================================================================
+
+    private void exibirMenuAdmin(View anchor) {
+        PopupMenu popup = new PopupMenu(this, anchor);
+
+        // Adiciona os itens manualmente (sem precisar de menu XML)
+        popup.getMenu().add(0, 1, 0, "Editar cidade");
+        popup.getMenu().add(0, 2, 1, "Apagar cidade");
+
+        // Deixa o item apagar em vermelho se a API permitir (API 26+)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            android.view.MenuItem itemApagar = popup.getMenu().findItem(2);
+            android.text.SpannableString span = new android.text.SpannableString(itemApagar.getTitle());
+            span.setSpan(new android.text.style.ForegroundColorSpan(0xFFD32F2F), 0, span.length(), 0);
+            itemApagar.setTitle(span);
+        }
+
+        popup.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == 1) {
+                editarCidade();
+                return true;
+            }
+            if (item.getItemId() == 2) {
+                confirmarApagarCidade();
+                return true;
+            }
+            return false;
+        });
+
+        popup.show();
+    }
+
+    // ── Editar cidade ──────────────────────────────────────────────────────────
+    private void editarCidade() {
+        Intent intent = new Intent(this, CriarCidadeActivity.class);
+        intent.putExtra("cidadeId",        cidadeId);
+        intent.putExtra("cidadeNome",      cidadeNome);
+        intent.putExtra("cidadeDescricao", cidadeDescricao);
+        intent.putExtra("cidadeImagemUrl", cidadeImagemUrl);
+        intent.putExtra("modoEdicao",      true);   // CriarCidadeActivity usa essa flag
+        startActivityForResult(intent, 100);
+    }
+
+    // ── Apagar cidade ──────────────────────────────────────────────────────────
+    private void confirmarApagarCidade() {
+        new AlertDialog.Builder(this)
+                .setTitle("Apagar cidade")
+                .setMessage("Tem certeza que deseja apagar \"" + cidadeNome + "\"?\n\nEsta ação não pode ser desfeita.")
+                .setPositiveButton("Apagar", (dialog, which) -> apagarCidade())
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void apagarCidade() {
+        if (cidadeId == null) return;
+
+        setCarregando(true);
+
+        db.collection("cidades").document(cidadeId)
+                .delete()
+                .addOnSuccessListener(unused -> {
+                    Toast.makeText(this, "Cidade apagada com sucesso", Toast.LENGTH_SHORT).show();
+                    finish(); // volta para a lista de cidades
+                })
+                .addOnFailureListener(e -> {
+                    setCarregando(false);
+                    Toast.makeText(this, "Erro ao apagar: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+    }
+
+    // Recebe resultado da tela de edição e atualiza o cabeçalho
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100 && resultCode == RESULT_OK && data != null) {
+            cidadeNome      = data.getStringExtra("cidadeNome");
+            cidadeDescricao = data.getStringExtra("cidadeDescricao");
+            cidadeImagemUrl = data.getStringExtra("cidadeImagemUrl");
+
+            txtNomeCidadeTitulo.setText(cidadeNome     != null ? cidadeNome     : "");
+            txtDescricaoCidade.setText(cidadeDescricao != null ? cidadeDescricao : "");
+            if (cidadeImagemUrl != null && !cidadeImagemUrl.isEmpty()) {
+                carregarImagem(ivCapaCidade, cidadeImagemUrl);
+            }
+        }
+    }
+
+    // =========================================================================
+    // LISTENER DE CONTEÚDOS
     // =========================================================================
 
     private void iniciarListener() {
         if (listenerConteudos != null) return;
         setCarregando(true);
 
-        Query query;
-
-        if (cidadeId != null && !cidadeId.equals("todas")) {
-            query = db.collection("conteudos")
-                    .whereEqualTo("cidadeId", cidadeId)
-                    .orderBy("ordem");
-        } else {
-            query = db.collection("conteudos")
-                    .orderBy("ordem");
-        }
+        Query query = (cidadeId != null && !cidadeId.equals("todas"))
+                ? db.collection("conteudos").whereEqualTo("cidadeId", cidadeId).orderBy("ordem")
+                : db.collection("conteudos").orderBy("ordem");
 
         listenerConteudos = query.addSnapshotListener((snapshot, error) -> {
             setCarregando(false);
-
-            if (error != null) {
-                android.util.Log.e("CONTEUDOS", "Erro: " + error.getMessage());
-                exibirVazio("Erro ao carregar");
-                return;
-            }
-
-            if (snapshot == null || snapshot.isEmpty()) {
-                exibirVazio("Nenhum conteúdo disponível");
-                return;
-            }
+            if (error != null) { exibirVazio("Erro ao carregar"); return; }
+            if (snapshot == null || snapshot.isEmpty()) { exibirVazio("Nenhum conteúdo disponível"); return; }
 
             List<DocumentSnapshot> docs = snapshot.getDocuments();
             layoutVazio.setVisibility(View.GONE);
@@ -285,9 +362,7 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
             for (DocumentSnapshot doc : listaOriginal) {
                 String cat = doc.getString("categoria") != null
                         ? doc.getString("categoria").toLowerCase() : "outro";
-                if ("todos".equals(categoria) || cat.equals(categoria)) {
-                    listaFiltrada.add(doc);
-                }
+                if ("todos".equals(categoria) || cat.equals(categoria)) listaFiltrada.add(doc);
             }
             notifyDataSetChanged();
         }
@@ -313,12 +388,10 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
             holder.txtTitulo.setText(titulo);
             holder.txtData.setText(data);
 
-            // Tempo estimado
             String desc = doc.getString("descricao");
             int chars = desc != null ? desc.length() : 0;
             holder.txtTempo.setText(Math.max(1, chars / 200) + " min");
 
-            // Badge categoria
             String badge = badgeLabel(categoria);
             int    cor   = corCategoria(categoria);
             holder.txtBadge.setText(badge);
@@ -328,7 +401,6 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
             badgeBg.setColor(cor);
             holder.txtBadge.setBackground(badgeBg);
 
-            // Thumbnail
             if (capaUrl != null && !capaUrl.isEmpty()) {
                 carregarImagem(holder.ivThumb, capaUrl);
             } else {
@@ -337,7 +409,6 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
                 holder.ivThumb.setColorFilter(cor);
             }
 
-            // Chips de arquivo
             holder.layoutChips.removeAllViews();
             if (Boolean.TRUE.equals(temAnexo) && arqTipo != null) {
                 adicionarChip(holder.layoutChips, chipLabel(arqTipo), corChip(arqTipo));
@@ -438,6 +509,10 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
             }
         }
     }
+
+    // =========================================================================
+    // HELPERS
+    // =========================================================================
 
     private int dp(int value) {
         return Math.round(value * getResources().getDisplayMetrics().density);

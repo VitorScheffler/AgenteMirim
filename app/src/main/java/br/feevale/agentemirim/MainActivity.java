@@ -38,31 +38,32 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        drawerLayout    = findViewById(R.id.drawerLayout);
+        drawerLayout        = findViewById(R.id.drawerLayout);
         ImageView ivMenu    = findViewById(R.id.ivMenu);
         ImageView ivUsuario = findViewById(R.id.ivUsuario);
         TextView  txtBoasVindas = findViewById(R.id.txtBoasVindas);
         CardView  cardConteudos = findViewById(R.id.cardConteudos);
 
-        // ── Carrega dados do usuário ──────────────────────────────────────────
+        // ── Carrega dados do usuário (somente se estiver logado) ──────────────
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             db.collection("usuarios").document(user.getUid())
                     .get()
                     .addOnSuccessListener(doc -> {
-                        // Boas-vindas com primeiro nome
                         String nome = doc.getString("nome");
                         if (nome != null && !nome.isEmpty()) {
                             txtBoasVindas.setText("Bem-vindo, " + nome.split(" ")[0] + "!");
                         }
 
-                        // Exibe o ☰ somente para admins
                         isAdmin = doc.exists() && "admin".equals(doc.getString("perfil"));
                         ivMenu.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
                     });
+        } else {
+            // Sem login: esconde o menu admin e mantém saudação padrão
+            ivMenu.setVisibility(View.GONE);
         }
 
-        // ── ☰ Abre o painel lateral admin ─────────────────────────────────────
+        // ── ☰ Painel lateral admin ────────────────────────────────────────────
         ivMenu.setOnClickListener(v -> {
             if (isAdmin) drawerLayout.openDrawer(GravityCompat.START);
         });
@@ -84,57 +85,112 @@ public class MainActivity extends AppCompatActivity {
         cardConteudos.setOnClickListener(v ->
                 startActivity(new Intent(this, ConteudosActivity.class)));
 
-        // ── 👤 PopupMenu do usuário (direita) ─────────────────────────────────
+        // ── 👤 Ícone de usuário ───────────────────────────────────────────────
         ivUsuario.setOnClickListener(this::exibirMenuUsuario);
     }
 
-    // ── Menu usuário ──────────────────────────────────────────────────────────
+    // ── onResume: atualiza ícone/saudação se o usuário logou e voltou ─────────
+    @Override
+    protected void onResume() {
+        super.onResume();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        ImageView ivMenu       = findViewById(R.id.ivMenu);
+        TextView  txtBoasVindas = findViewById(R.id.txtBoasVindas);
 
+        if (user != null) {
+            db.collection("usuarios").document(user.getUid())
+                    .get()
+                    .addOnSuccessListener(doc -> {
+                        String nome = doc.getString("nome");
+                        if (nome != null && !nome.isEmpty()) {
+                            txtBoasVindas.setText("Bem-vindo, " + nome.split(" ")[0] + "!");
+                        }
+                        isAdmin = doc.exists() && "admin".equals(doc.getString("perfil"));
+                        ivMenu.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+                    });
+        } else {
+            // Usuário fez logout ou nunca logou — reseta estado
+            isAdmin = false;
+            ivMenu.setVisibility(View.GONE);
+            txtBoasVindas.setText("Bem-vindo!");
+        }
+    }
+
+    // ── Menu do ícone de usuário ──────────────────────────────────────────────
     private void exibirMenuUsuario(View anchorView) {
-        PopupMenu popup = new PopupMenu(this, anchorView);
-        popup.getMenuInflater().inflate(R.menu.menu_usuario, popup.getMenu());
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        popup.setOnMenuItemClickListener(item -> {
-            int id = item.getItemId();
-            if (id == R.id.action_perfil) {
-                startActivity(new Intent(this, PerfilUsuarioActivity.class));
-                return true;
-            }
-            if (id == R.id.action_sair) {
-                confirmarSaida();
-                return true;
-            }
-            return false;
-        });
+        PopupMenu popup = new PopupMenu(this, anchorView);
+
+        if (user == null) {
+            // Não logado → opção simples de login
+            popup.getMenu().add(0, 1001, 0, "Entrar");
+
+            popup.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == 1001) {
+                    startActivity(new Intent(this, LoginActivity.class));
+                    return true;
+                }
+                return false;
+            });
+
+        } else {
+            // Logado → menu normal
+            popup.getMenuInflater().inflate(R.menu.menu_usuario, popup.getMenu());
+
+            popup.setOnMenuItemClickListener(item -> {
+                int id = item.getItemId();
+
+                if (id == R.id.action_perfil) {
+                    startActivity(new Intent(this, PerfilUsuarioActivity.class));
+                    return true;
+                }
+
+                if (id == R.id.action_sair) {
+                    confirmarLogout();
+                    return true;
+                }
+
+                return false;
+            });
+        }
 
         popup.show();
     }
 
-    // ── Sair ──────────────────────────────────────────────────────────────────
-
-    private void confirmarSaida() {
+    // ── Confirmar logout ──────────────────────────────────────────────────────
+    private void confirmarLogout() {
         new AlertDialog.Builder(this)
-                .setTitle("Sair")
-                .setMessage("Deseja realmente sair do aplicativo?")
-                .setPositiveButton("Sair", (dialog, which) -> fazerLogout())
+                .setTitle("Sair da conta")
+                .setMessage("Deseja sair da sua conta?")
+                .setPositiveButton("Sair", (dialog, which) -> {
+
+                    FirebaseAuth.getInstance().signOut();
+
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                })
                 .setNegativeButton("Cancelar", null)
                 .show();
     }
 
     private void fazerLogout() {
         FirebaseAuth.getInstance().signOut();
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+        // Não redireciona para login — apenas desloga e atualiza a tela
+        isAdmin = false;
+        findViewById(R.id.ivMenu).setVisibility(View.GONE);
+        ((TextView) findViewById(R.id.txtBoasVindas)).setText("Bem-vindo!");
     }
 
+    // ── Voltar: fecha drawer ou minimiza o app (sem logout) ───────────────────
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
-            confirmarSaida();
+            // Minimiza o app sem matar a Activity
+            moveTaskToBack(true);
         }
     }
 }

@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
@@ -48,20 +47,19 @@ public class LoginActivity extends AppCompatActivity {
         txtEsqueciSenha.setOnClickListener(v ->
                 startActivity(new Intent(this, RecuperarSenhaActivity.class)));
 
-        // Bloqueia gesto de voltar na tela de login
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                // bloqueado
-            }
-        });
+        // ❌ REMOVIDO: bloqueio do botão voltar
+        // O usuário pode fechar a tela de login e continuar navegando sem conta
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        // ❌ REMOVIDO: redirecionamento automático para MainActivity
+        // Se o usuário já estiver logado e abrir a tela de login manualmente,
+        // simplesmente mostramos a tela — ele pode voltar ou fazer logout.
         FirebaseUser usuario = mAuth.getCurrentUser();
         if (usuario != null) {
+            // Já logado: vai direto para o perfil/MainActivity sem forçar nada
             verificarPerfil(usuario);
         }
     }
@@ -87,11 +85,6 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    /**
-     * Consulta Firestore para verificar se o usuário já completou o perfil.
-     * - perfilCompleto = true  → vai para MainActivity
-     * - perfilCompleto = false → vai para CompletarPerfilActivity (primeiro acesso)
-     */
     private void verificarPerfil(FirebaseUser user) {
         if (user == null) { setCarregando(false); return; }
 
@@ -108,14 +101,15 @@ public class LoginActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     setCarregando(false);
-                    // Em caso de falha, redireciona para completar o perfil
                     irPara(CompletarPerfilActivity.class);
                 });
     }
 
     private void irPara(Class<?> destino) {
         Intent intent = new Intent(this, destino);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        // ✅ Sem FLAG_ACTIVITY_CLEAR_TASK — mantém a back stack para o usuário
+        //    poder voltar ao conteúdo depois de logar
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
         finish();
     }

@@ -1,369 +1,388 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    activity_conteudos.xml
-    Destino: app/src/main/res/layout/activity_conteudos.xml
--->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#F5F7F5">
+    android:layout_height="match_parent">
 
-    <!-- Toolbar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+    <!-- ══════════════════════════════════════════
+         CONTEÚDO PRINCIPAL
+         ══════════════════════════════════════════ -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:background="#2E7D32"
-        app:contentInsetStart="0dp"
-        app:contentInsetEnd="0dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="#F5F7F5"
+        android:fitsSystemWindows="true">
 
-        <RelativeLayout
+        <!-- Toolbar -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingHorizontal="16dp">
+            android:layout_height="64dp"
+            android:background="#2E7D32"
+            app:contentInsetStart="0dp"
+            app:contentInsetEnd="0dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="Conteúdos"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"/>
-
-            <!-- Menu hambúrguer (admin) -->
-            <ImageView
-                android:id="@+id/ivMenu"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:src="@drawable/ic_menu"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true"
-                android:visibility="gone"
-                android:contentDescription="Menu"/>
-
-            <!-- Ícone usuário -->
-            <ImageView
-                android:id="@+id/ivUsuario"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:src="@drawable/ic_account_circle"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true"
-                android:contentDescription="Usuário"/>
-
-        </RelativeLayout>
-    </androidx.appcompat.widget.Toolbar>
-
-    <!-- Conteúdo scrollável -->
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="24dp">
-
-            <!-- ── Banner de boas-vindas ── -->
-            <androidx.cardview.widget.CardView
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="130dp"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="#2E7D32">
+                android:layout_height="match_parent"
+                android:paddingHorizontal="16dp">
 
-                <RelativeLayout
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="Conteúdos"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"/>
+
+                <ImageView
+                    android:id="@+id/ivMenu"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_menu"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:visibility="gone"
+                    android:contentDescription="Menu"/>
+
+                <ImageView
+                    android:id="@+id/ivUsuario"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_account_circle"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Usuário"/>
+
+            </RelativeLayout>
+        </androidx.appcompat.widget.Toolbar>
+
+        <!-- Conteúdo scrollável -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="24dp">
+
+                <!-- Banner de boas-vindas -->
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="18dp">
+                    android:layout_height="130dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="#2E7D32">
 
-                    <!-- Círculo decorativo fundo -->
-                    <View
-                        android:layout_width="140dp"
-                        android:layout_height="140dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginEnd="-30dp"
-                        android:background="@drawable/circle_light_green"
-                        android:alpha="0.15"/>
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="18dp">
 
-                    <!-- Textos -->
+                        <View
+                            android:layout_width="140dp"
+                            android:layout_height="140dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginEnd="-30dp"
+                            android:background="@drawable/circle_light_green"
+                            android:alpha="0.15"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_toStartOf="@+id/ivMascote"
+                            android:layout_centerVertical="true"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Olá, Agente Mirim! 👋"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="#FFFFFF"
+                                android:layout_marginBottom="6dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Explore conteúdos educativos\npor cidade e tema."
+                                android:textSize="12sp"
+                                android:textColor="#C8E6C9"
+                                android:lineSpacingExtra="2dp"/>
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/ivMascote"
+                            android:layout_width="100dp"
+                            android:layout_height="110dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentBottom="true"
+                            android:src="@drawable/mascote"
+                            android:scaleType="fitEnd"
+                            android:contentDescription="Mascote"/>
+
+                    </RelativeLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Cards: Todas as cidades / Minhas cidades -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginBottom="20dp">
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cardTodasCidades"
+                        android:layout_width="0dp"
+                        android:layout_height="70dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="#FFFFFF">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:padding="12dp">
+
+                            <androidx.cardview.widget.CardView
+                                android:layout_width="38dp"
+                                android:layout_height="38dp"
+                                android:layout_marginEnd="10dp"
+                                app:cardCornerRadius="10dp"
+                                app:cardElevation="0dp"
+                                app:cardBackgroundColor="#E3F2FD">
+                                <ImageView
+                                    android:layout_width="22dp"
+                                    android:layout_height="22dp"
+                                    android:layout_gravity="center"
+                                    android:src="@android:drawable/ic_dialog_map"
+                                    android:tint="#1565C0"/>
+                            </androidx.cardview.widget.CardView>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Todas as\ncidades"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold"
+                                    android:textColor="#1A1A1A"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Ver conteúdos gerais"
+                                    android:textSize="10sp"
+                                    android:textColor="#9E9E9E"/>
+                            </LinearLayout>
+
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cardMinhasCidades"
+                        android:layout_width="0dp"
+                        android:layout_height="70dp"
+                        android:layout_weight="1"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="#FFFFFF">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:padding="12dp">
+
+                            <androidx.cardview.widget.CardView
+                                android:layout_width="38dp"
+                                android:layout_height="38dp"
+                                android:layout_marginEnd="10dp"
+                                app:cardCornerRadius="10dp"
+                                app:cardElevation="0dp"
+                                app:cardBackgroundColor="#FFEBEE">
+                                <ImageView
+                                    android:layout_width="22dp"
+                                    android:layout_height="22dp"
+                                    android:layout_gravity="center"
+                                    android:src="@android:drawable/ic_menu_myplaces"
+                                    android:tint="#C62828"/>
+                            </androidx.cardview.widget.CardView>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Minhas\ncidades"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold"
+                                    android:textColor="#1A1A1A"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Selecionar cidades"
+                                    android:textSize="10sp"
+                                    android:textColor="#9E9E9E"/>
+                            </LinearLayout>
+
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                </LinearLayout>
+
+                <!-- Título da seção -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginBottom="10dp">
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_toStartOf="@+id/ivMascote"
-                        android:layout_centerVertical="true"
+                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Olá, Agente Mirim! 👋"
+                            android:text="Cidades disponíveis"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="#FFFFFF"
-                            android:layout_marginBottom="6dp"/>
+                            android:textColor="#1A1A1A"/>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Explore conteúdos educativos\npor cidade e tema."
+                            android:text="Selecione uma cidade para explorar seus conteúdos"
                             android:textSize="12sp"
-                            android:textColor="#C8E6C9"
-                            android:lineSpacingExtra="2dp"/>
+                            android:textColor="#9E9E9E"
+                            android:layout_marginTop="2dp"/>
 
                     </LinearLayout>
-
-                    <!-- Mascote -->
-                    <ImageView
-                        android:id="@+id/ivMascote"
-                        android:layout_width="100dp"
-                        android:layout_height="110dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_alignParentBottom="true"
-                        android:src="@drawable/mascote"
-                        android:scaleType="fitEnd"
-                        android:contentDescription="Mascote"/>
-
-                </RelativeLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- ── Cards: Todas as cidades / Minhas cidades ── -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:layout_marginBottom="20dp">
-
-                <!-- Todas as cidades -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardTodasCidades"
-                    android:layout_width="0dp"
-                    android:layout_height="70dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:cardBackgroundColor="#FFFFFF">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:padding="12dp">
-
-                        <androidx.cardview.widget.CardView
-                            android:layout_width="38dp"
-                            android:layout_height="38dp"
-                            android:layout_marginEnd="10dp"
-                            app:cardCornerRadius="10dp"
-                            app:cardElevation="0dp"
-                            app:cardBackgroundColor="#E3F2FD">
-                            <ImageView
-                                android:layout_width="22dp"
-                                android:layout_height="22dp"
-                                android:layout_gravity="center"
-                                android:src="@android:drawable/ic_dialog_map"
-                                android:tint="#1565C0"/>
-                        </androidx.cardview.widget.CardView>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Todas as\ncidades"
-                                android:textSize="12sp"
-                                android:textStyle="bold"
-                                android:textColor="#1A1A1A"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Ver conteúdos gerais"
-                                android:textSize="10sp"
-                                android:textColor="#9E9E9E"/>
-                        </LinearLayout>
-
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <!-- Minhas cidades -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardMinhasCidades"
-                    android:layout_width="0dp"
-                    android:layout_height="70dp"
-                    android:layout_weight="1"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:cardBackgroundColor="#FFFFFF">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:padding="12dp">
-
-                        <androidx.cardview.widget.CardView
-                            android:layout_width="38dp"
-                            android:layout_height="38dp"
-                            android:layout_marginEnd="10dp"
-                            app:cardCornerRadius="10dp"
-                            app:cardElevation="0dp"
-                            app:cardBackgroundColor="#FFEBEE">
-                            <ImageView
-                                android:layout_width="22dp"
-                                android:layout_height="22dp"
-                                android:layout_gravity="center"
-                                android:src="@android:drawable/ic_menu_myplaces"
-                                android:tint="#C62828"/>
-                        </androidx.cardview.widget.CardView>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Minhas\ncidades"
-                                android:textSize="12sp"
-                                android:textStyle="bold"
-                                android:textColor="#1A1A1A"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Selecionar cidades"
-                                android:textSize="10sp"
-                                android:textColor="#9E9E9E"/>
-                        </LinearLayout>
-
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-            </LinearLayout>
-
-            <!-- ── Título da seção de cidades ── -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
-                android:layout_marginBottom="10dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Cidades disponíveis"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="#1A1A1A"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Selecione uma cidade para explorar seus conteúdos"
-                        android:textSize="12sp"
-                        android:textColor="#9E9E9E"
-                        android:layout_marginTop="2dp"/>
 
                 </LinearLayout>
 
-            </LinearLayout>
+                <!-- Lista de cidades -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerCidades"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:paddingHorizontal="16dp"
+                    android:nestedScrollingEnabled="false"/>
 
-            <!-- ── Lista de cidades (RecyclerView) ── -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerCidades"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:paddingHorizontal="16dp"
-                android:nestedScrollingEnabled="false"/>
+                <!-- Estado vazio -->
+                <LinearLayout
+                    android:id="@+id/layoutVazio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:paddingTop="40dp"
+                    android:visibility="gone">
 
-            <!-- ── Estado vazio ── -->
-            <LinearLayout
-                android:id="@+id/layoutVazio"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:paddingTop="40dp"
-                android:visibility="gone">
+                    <ImageView
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@android:drawable/ic_dialog_map"
+                        android:alpha="0.2"/>
 
-                <ImageView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:src="@android:drawable/ic_dialog_map"
-                    android:alpha="0.2"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nenhuma cidade disponível"
+                        android:textSize="14sp"
+                        android:textColor="#BDBDBD"
+                        android:layout_marginTop="12dp"/>
 
-                <TextView
+                </LinearLayout>
+
+                <!-- ProgressBar -->
+                <ProgressBar
+                    android:id="@+id/progressBar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nenhuma cidade disponível"
-                    android:textSize="14sp"
-                    android:textColor="#BDBDBD"
-                    android:layout_marginTop="12dp"/>
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="20dp"
+                    android:visibility="gone"
+                    android:indeterminateTint="#2E7D32"/>
 
             </LinearLayout>
+        </ScrollView>
 
-            <!-- ProgressBar -->
-            <ProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="20dp"
-                android:visibility="gone"
-                android:indeterminateTint="#2E7D32"/>
+        <!-- FAB -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabAdicionarCidade"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="20dp"
+            android:src="@android:drawable/ic_input_add"
+            android:contentDescription="Adicionar cidade"
+            app:backgroundTint="#2E7D32"
+            app:tint="#FFFFFF"
+            app:elevation="8dp"
+            android:visibility="gone"/>
 
-        </LinearLayout>
-    </ScrollView>
+    </LinearLayout>
 
-    <!-- FAB: adicionar cidade (só admin) -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAdicionarCidade"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="20dp"
-        android:src="@android:drawable/ic_input_add"
-        android:contentDescription="Adicionar cidade"
-        app:backgroundTint="#2E7D32"
-        app:tint="#FFFFFF"
-        app:elevation="8dp"
-        android:visibility="gone"/>
+    <!-- ══════════════════════════════════════════
+         PAINEL LATERAL ADMIN
+         ══════════════════════════════════════════ -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navAdmin"
+        android:layout_width="260dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="#FAFFFE"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_admin"
+        app:menu="@menu/menu_admin"
+        app:itemTextColor="#1B5E20"
+        app:itemIconTint="#2E7D32"
+        app:itemRippleColor="#E8F5E9"
+        app:itemBackground="@null"
+        app:itemTextAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
-</LinearLayout>
+</androidx.drawerlayout.widget.DrawerLayout>
