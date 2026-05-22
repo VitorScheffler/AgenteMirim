@@ -50,4 +50,7 @@ dependencies {
 
     // FireStore
     implementation("com.google.firebase:firebase-firestore")
+
+    // Glide
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }

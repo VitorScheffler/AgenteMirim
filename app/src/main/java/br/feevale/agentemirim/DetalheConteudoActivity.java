@@ -30,6 +30,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
+
 import br.feevale.agentemirim.api.ApiClient;
 
 /**
@@ -89,8 +93,7 @@ public class DetalheConteudoActivity extends AppCompatActivity {
     private TextView     txtSemArquivos;
 
     // ── Views: rodapé ─────────────────────────────────────────────────────────
-    private MaterialButton btnCompartilharRodape;
-    private MaterialButton btnSalvarDepois;
+
     private ProgressBar    progressBar;
 
     // ── Dados ─────────────────────────────────────────────────────────────────
@@ -162,8 +165,6 @@ public class DetalheConteudoActivity extends AppCompatActivity {
         layoutArquivos      = findViewById(R.id.layoutArquivos);
         txtSemArquivos      = findViewById(R.id.txtSemArquivos);
 
-        btnCompartilharRodape = findViewById(R.id.btnCompartilharRodape);
-        btnSalvarDepois       = findViewById(R.id.btnSalvarDepois);
         progressBar           = findViewById(R.id.progressBar);
 
         layoutAcoes.setVisibility(View.GONE);
@@ -246,9 +247,6 @@ public class DetalheConteudoActivity extends AppCompatActivity {
             txtSemArquivos.setVisibility(View.VISIBLE);
         }
 
-        // ── Rodapé ────────────────────────────────────────────────────────────
-        btnCompartilharRodape.setOnClickListener(v -> compartilhar());
-        btnSalvarDepois.setOnClickListener(v -> salvarDepois());
     }
 
     // =========================================================================
@@ -372,9 +370,9 @@ public class DetalheConteudoActivity extends AppCompatActivity {
     // =========================================================================
 
     private void compartilhar() {
-        String titulo    = txtTitulo.getText().toString();
+        String titulo = txtTitulo.getText().toString();
         String descricao = txtDescricao.getText().toString();
-        String texto     = "📚 " + titulo
+        String texto = "📚 " + titulo
                 + "\n\n" + descricao
                 + (arquivoUrl != null ? "\n\n🔗 " + arquivoUrl : "")
                 + "\n\nCompartilhado via Agente Mirim";
@@ -383,15 +381,6 @@ public class DetalheConteudoActivity extends AppCompatActivity {
         share.setType("text/plain");
         share.putExtra(Intent.EXTRA_TEXT, texto);
         startActivity(Intent.createChooser(share, "Compartilhar via..."));
-    }
-
-    private void salvarDepois() {
-        // TODO: implementar lista de favoritos no Firestore
-        new AlertDialog.Builder(this)
-                .setTitle("⭐ Salvo!")
-                .setMessage("Este conteúdo foi salvo para você ler depois.")
-                .setPositiveButton("OK", null)
-                .show();
     }
 
     // =========================================================================
@@ -563,18 +552,17 @@ public class DetalheConteudoActivity extends AppCompatActivity {
         if (btnSalvarEdicao != null) btnSalvarEdicao.setEnabled(!c);
     }
 
+    private static final String AUTH_TOKEN = "-R,V*ox+>K,0o76MH=XYNG9.sRz@xLLR";
+
     private void carregarImagem(ImageView iv, String url) {
-        new Thread(() -> {
-            try {
-                java.net.URL imgUrl = new java.net.URL(url);
-                java.net.HttpURLConnection conn =
-                        (java.net.HttpURLConnection) imgUrl.openConnection();
-                conn.setRequestProperty("ngrok-skip-browser-warning", "true");
-                conn.connect();
-                Bitmap bmp = BitmapFactory.decodeStream(conn.getInputStream());
-                runOnUiThread(() -> { if (bmp != null) iv.setImageBitmap(bmp); });
-            } catch (Exception ignored) {}
-        }).start();
+        GlideUrl glideUrl = new GlideUrl(url, new LazyHeaders.Builder()
+                .addHeader("Authorization", "Bearer " + AUTH_TOKEN)
+                .addHeader("ngrok-skip-browser-warning", "true")
+                .build());
+
+        Glide.with(this)
+                .load(glideUrl)
+                .into(iv);
     }
 
     private String badgeLabel(String cat) {

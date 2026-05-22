@@ -10,7 +10,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -27,19 +29,34 @@ import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.List;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
+
 public class ConteudosActivity extends AppCompatActivity {
 
+    // ── Views ─────────────────────────────────────────────────────────────────
     private RecyclerView         recyclerCidades;
     private LinearLayout         layoutVazio;
     private ProgressBar          progressBar;
     private FloatingActionButton fabAdicionarCidade;
     private ImageView            ivMenu;
-    private DrawerLayout         drawerLayout;   // ← novo
-    private NavigationView       navAdmin;        // ← novo
+    private DrawerLayout         drawerLayout;
+    private NavigationView       navAdmin;
 
+    // ── Dados ─────────────────────────────────────────────────────────────────
+    private boolean isAdmin = false;
+
+    // ── Firebase ──────────────────────────────────────────────────────────────
     private FirebaseFirestore    db;
     private ListenerRegistration listenerCidades;
     private CidadeAdapter        adapter;
+
+    private static final String AUTH_TOKEN = "-R,V*ox+>K,0o76MH=XYNG9.sRz@xLLR";
+
+    // =========================================================================
+    // LIFECYCLE
+    // =========================================================================
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +88,6 @@ public class ConteudosActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // Fecha o drawer ao apertar voltar, se estiver aberto
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
@@ -79,14 +95,18 @@ public class ConteudosActivity extends AppCompatActivity {
         }
     }
 
+    // =========================================================================
+    // SETUP
+    // =========================================================================
+
     private void bindViews() {
         recyclerCidades    = findViewById(R.id.recyclerCidades);
         layoutVazio        = findViewById(R.id.layoutVazio);
         progressBar        = findViewById(R.id.progressBar);
         fabAdicionarCidade = findViewById(R.id.fabAdicionarCidade);
         ivMenu             = findViewById(R.id.ivMenu);
-        drawerLayout       = findViewById(R.id.drawerLayout);   // ← novo
-        navAdmin           = findViewById(R.id.navAdmin);        // ← novo
+        drawerLayout       = findViewById(R.id.drawerLayout);
+        navAdmin           = findViewById(R.id.navAdmin);
 
         recyclerCidades.setLayoutManager(new LinearLayoutManager(this));
         fabAdicionarCidade.setVisibility(View.GONE);
@@ -94,6 +114,9 @@ public class ConteudosActivity extends AppCompatActivity {
     }
 
     private void configurarAcoes() {
+        // Ícone de usuário → abre menu popup
+        findViewById(R.id.ivUsuario).setOnClickListener(this::exibirMenuUsuario);
+
         // Card "Todas as cidades"
         findViewById(R.id.cardTodasCidades).setOnClickListener(v -> {
             Intent intent = new Intent(this, ConteudosCidadeActivity.class);
@@ -112,24 +135,26 @@ public class ConteudosActivity extends AppCompatActivity {
         fabAdicionarCidade.setOnClickListener(v ->
                 startActivity(new Intent(this, CriarCidadeActivity.class)));
 
-        // ── Hambúrguer → abre o drawer ────────────────────────────────────────
+        // Hambúrguer → abre o drawer
         ivMenu.setOnClickListener(v ->
                 drawerLayout.openDrawer(GravityCompat.START));
 
-        // ── Itens do menu lateral ─────────────────────────────────────────────
+        // Itens do menu lateral
         navAdmin.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
-
             if (id == R.id.action_gerenciar_usuarios) {
                 startActivity(new Intent(this, GerenciarUsuariosActivity.class));
             } else if (id == R.id.action_criar_usuario) {
                 startActivity(new Intent(this, CriarUsuarioActivity.class));
             }
-
             drawerLayout.closeDrawer(GravityCompat.START);
             return true;
         });
     }
+
+    // =========================================================================
+    // PERFIL
+    // =========================================================================
 
     private void verificarPerfil() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -139,11 +164,71 @@ public class ConteudosActivity extends AppCompatActivity {
                 .addOnSuccessListener(doc -> {
                     String perfil = doc.exists() && doc.getString("perfil") != null
                             ? doc.getString("perfil") : "usuario";
-                    boolean isAdmin = "admin".equals(perfil);
+                    isAdmin = "admin".equals(perfil);
                     fabAdicionarCidade.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
                     ivMenu.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
                 });
     }
+
+    // =========================================================================
+    // MENU USUÁRIO
+    // =========================================================================
+
+    private void exibirMenuUsuario(View anchorView) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        PopupMenu popup = new PopupMenu(this, anchorView);
+
+        if (user == null) {
+            popup.getMenu().add(0, 1001, 0, "Entrar");
+            popup.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == 1001) {
+                    startActivity(new Intent(this, LoginActivity.class));
+                    return true;
+                }
+                return false;
+            });
+        } else {
+            popup.getMenuInflater().inflate(R.menu.menu_usuario, popup.getMenu());
+            popup.setOnMenuItemClickListener(item -> {
+                int id = item.getItemId();
+                if (id == R.id.action_perfil) {
+                    startActivity(new Intent(this, PerfilUsuarioActivity.class));
+                    return true;
+                }
+                if (id == R.id.action_sair) {
+                    confirmarLogout();
+                    return true;
+                }
+                return false;
+            });
+        }
+        popup.show();
+    }
+
+    private void confirmarLogout() {
+        new AlertDialog.Builder(this)
+                .setTitle("Sair da conta")
+                .setMessage("Deseja sair da sua conta?")
+                .setPositiveButton("Sair", (dialog, which) -> {
+                    FirebaseAuth.getInstance().signOut();
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void fazerLogout() {
+        FirebaseAuth.getInstance().signOut();
+        isAdmin = false;
+        fabAdicionarCidade.setVisibility(View.GONE);
+        ivMenu.setVisibility(View.GONE);
+    }
+
+    // =========================================================================
+    // LISTENER DE CIDADES
+    // =========================================================================
 
     private void iniciarListener() {
         setCarregando(true);
@@ -235,16 +320,18 @@ public class ConteudosActivity extends AppCompatActivity {
         }
     }
 
+    // =========================================================================
+    // HELPERS
+    // =========================================================================
+
     private void carregarImagemUrl(ImageView iv, String url) {
-        new Thread(() -> {
-            try {
-                java.net.URL imgUrl = new java.net.URL(url);
-                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) imgUrl.openConnection();
-                conn.setRequestProperty("ngrok-skip-browser-warning", "true");
-                conn.connect();
-                android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(conn.getInputStream());
-                runOnUiThread(() -> { if (bmp != null) iv.setImageBitmap(bmp); });
-            } catch (Exception ignored) {}
-        }).start();
+        GlideUrl glideUrl = new GlideUrl(url, new LazyHeaders.Builder()
+                .addHeader("Authorization", "Bearer " + AUTH_TOKEN)
+                .addHeader("ngrok-skip-browser-warning", "true")
+                .build());
+
+        Glide.with(this)
+                .load(glideUrl)
+                .into(iv);
     }
 }

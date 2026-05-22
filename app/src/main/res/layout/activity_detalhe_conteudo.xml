@@ -313,7 +313,7 @@
                         android:layout_width="0dp"
                         android:layout_height="48dp"
                         android:layout_weight="1"
-                        android:text="🗑  Apagar"
+                        android:text="Apagar"
                         android:textColor="#C62828"
                         android:textStyle="bold"
                         android:textSize="13sp"
@@ -496,7 +496,7 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Rodapé com 2 botões -->
+    <!-- Rodapé -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -524,23 +524,7 @@
             app:iconGravity="textStart"
             app:iconPadding="8dp"/>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSalvarDepois"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="Salvar para depois"
-            android:textColor="#2E7D32"
-            android:textStyle="bold"
-            android:textSize="14sp"
-            app:backgroundTint="#FFFFFF"
-            app:cornerRadius="16dp"
-            app:elevation="0dp"
-            app:strokeColor="#2E7D32"
-            app:strokeWidth="1.5dp"
-            app:icon="@android:drawable/btn_star_big_off"
-            app:iconTint="#2E7D32"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"/>
+
 
     </LinearLayout>
 

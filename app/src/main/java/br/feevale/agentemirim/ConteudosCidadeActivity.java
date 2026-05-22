@@ -31,6 +31,10 @@ import com.google.firebase.firestore.Query;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
+
 public class ConteudosCidadeActivity extends AppCompatActivity {
 
     // ── Views ─────────────────────────────────────────────────────────────────
@@ -42,7 +46,7 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
     private LinearLayout         layoutVazio;
     private ProgressBar          progressBar;
     private FloatingActionButton fabNovoConteudo;
-    private View                 btnMenuAdmin;   // ⋮ botão de opções admin
+    private View                 btnMenuAdmin;
 
     // ── Dados ─────────────────────────────────────────────────────────────────
     private String cidadeId, cidadeNome, cidadeDescricao, cidadeImagemUrl;
@@ -167,7 +171,7 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
     }
 
     // =========================================================================
-    // PERFIL — exibe controles admin se necessário
+    // PERFIL
     // =========================================================================
 
     private void verificarPerfil() {
@@ -181,7 +185,6 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
                     boolean podeGerenciar = "projeto".equals(perfil) || "admin".equals(perfil);
                     isAdmin = "admin".equals(perfil);
 
-                    // FAB: novo conteúdo
                     fabNovoConteudo.setVisibility(podeGerenciar ? View.VISIBLE : View.GONE);
                     fabNovoConteudo.setOnClickListener(v -> {
                         Intent intent = new Intent(this, CriarConteudoActivity.class);
@@ -190,24 +193,20 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
                         startActivity(intent);
                     });
 
-                    // ⋮ Menu admin (editar/apagar cidade) — só para admin
                     btnMenuAdmin.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
                     btnMenuAdmin.setOnClickListener(this::exibirMenuAdmin);
                 });
     }
 
     // =========================================================================
-    // MENU ADMIN — Editar / Apagar cidade
+    // MENU ADMIN
     // =========================================================================
 
     private void exibirMenuAdmin(View anchor) {
         PopupMenu popup = new PopupMenu(this, anchor);
-
-        // Adiciona os itens manualmente (sem precisar de menu XML)
         popup.getMenu().add(0, 1, 0, "Editar cidade");
         popup.getMenu().add(0, 2, 1, "Apagar cidade");
 
-        // Deixa o item apagar em vermelho se a API permitir (API 26+)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             android.view.MenuItem itemApagar = popup.getMenu().findItem(2);
             android.text.SpannableString span = new android.text.SpannableString(itemApagar.getTitle());
@@ -216,32 +215,24 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
         }
 
         popup.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == 1) {
-                editarCidade();
-                return true;
-            }
-            if (item.getItemId() == 2) {
-                confirmarApagarCidade();
-                return true;
-            }
+            if (item.getItemId() == 1) { editarCidade();          return true; }
+            if (item.getItemId() == 2) { confirmarApagarCidade(); return true; }
             return false;
         });
 
         popup.show();
     }
 
-    // ── Editar cidade ──────────────────────────────────────────────────────────
     private void editarCidade() {
         Intent intent = new Intent(this, CriarCidadeActivity.class);
         intent.putExtra("cidadeId",        cidadeId);
         intent.putExtra("cidadeNome",      cidadeNome);
         intent.putExtra("cidadeDescricao", cidadeDescricao);
         intent.putExtra("cidadeImagemUrl", cidadeImagemUrl);
-        intent.putExtra("modoEdicao",      true);   // CriarCidadeActivity usa essa flag
+        intent.putExtra("modoEdicao",      true);
         startActivityForResult(intent, 100);
     }
 
-    // ── Apagar cidade ──────────────────────────────────────────────────────────
     private void confirmarApagarCidade() {
         new AlertDialog.Builder(this)
                 .setTitle("Apagar cidade")
@@ -253,14 +244,12 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
 
     private void apagarCidade() {
         if (cidadeId == null) return;
-
         setCarregando(true);
-
         db.collection("cidades").document(cidadeId)
                 .delete()
                 .addOnSuccessListener(unused -> {
                     Toast.makeText(this, "Cidade apagada com sucesso", Toast.LENGTH_SHORT).show();
-                    finish(); // volta para a lista de cidades
+                    finish();
                 })
                 .addOnFailureListener(e -> {
                     setCarregando(false);
@@ -268,7 +257,6 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
                 });
     }
 
-    // Recebe resultado da tela de edição e atualiza o cabeçalho
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -339,6 +327,7 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
         intent.putExtra(DetalheConteudoActivity.EXTRA_ARQUIVO_NOME, doc.getString("arquivoNome"));
         intent.putExtra(DetalheConteudoActivity.EXTRA_ARQUIVO_TIPO, doc.getString("arquivoTipo"));
         intent.putExtra(DetalheConteudoActivity.EXTRA_ARQUIVO_ID,   doc.getString("arquivoId"));
+        intent.putExtra(DetalheConteudoActivity.EXTRA_CAPA_URL,     doc.getString("capaUrl")); // ← FIX
         intent.putExtra("cidadeNome", cidadeNome);
         startActivity(intent);
     }
@@ -518,17 +507,18 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
+    private static final String AUTH_TOKEN = "-R,V*ox+>K,0o76MH=XYNG9.sRz@xLLR";
+
     private void carregarImagem(ImageView iv, String url) {
-        new Thread(() -> {
-            try {
-                java.net.URL imgUrl = new java.net.URL(url);
-                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) imgUrl.openConnection();
-                conn.setRequestProperty("ngrok-skip-browser-warning", "true");
-                conn.connect();
-                android.graphics.Bitmap bmp =
-                        android.graphics.BitmapFactory.decodeStream(conn.getInputStream());
-                runOnUiThread(() -> { if (bmp != null) iv.setImageBitmap(bmp); });
-            } catch (Exception ignored) {}
-        }).start();
+        if (url == null || url.isEmpty()) return;
+        url = url.trim();
+        GlideUrl glideUrl = new GlideUrl(url, new LazyHeaders.Builder()
+                .addHeader("Authorization", "Bearer " + AUTH_TOKEN)
+                .addHeader("ngrok-skip-browser-warning", "true")
+                .build());
+
+        Glide.with(this)
+                .load(glideUrl)
+                .into(iv);
     }
 }
