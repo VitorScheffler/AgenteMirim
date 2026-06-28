@@ -93,7 +93,17 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (listenerConteudos != null) { listenerConteudos.remove(); listenerConteudos = null; }
+        if (listenerConteudos != null) {
+            listenerConteudos.remove();
+            listenerConteudos = null; // ← garante que onStart() vai recriar
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Reinicia o listener sempre que a Activity volta ao primeiro plano
+        iniciarListener();
     }
 
     private void bindViews() {
@@ -278,7 +288,7 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
     // =========================================================================
 
     private void iniciarListener() {
-        if (listenerConteudos != null) return;
+        // ← REMOVIDO: if (listenerConteudos != null) return;
         setCarregando(true);
 
         Query query = (cidadeId != null && !cidadeId.equals("todas"))

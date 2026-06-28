@@ -16,9 +16,9 @@
         android:theme="@style/Theme.AgenteMirim"
         tools:targetApi="31">
 
-        <!-- ✅ Tela principal — ponto de entrada do app -->
+        <!-- Tela principal -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ConteudosActivity"
             android:exported="true"
             android:screenOrientation="portrait">
 
@@ -29,72 +29,66 @@
 
         </activity>
 
-        <!-- Login — aberto apenas ao clicar no ícone de perfil -->
+        <!-- Login -->
         <activity
             android:name=".LoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <!-- Recuperar senha -->
         <activity
             android:name=".RecuperarSenhaActivity"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <!-- Perfil do usuário -->
         <activity
             android:name=".PerfilUsuarioActivity"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
-        <!-- Completar perfil (primeiro acesso) -->
+        <!-- Completar perfil -->
         <activity
             android:name=".CompletarPerfilActivity"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <!-- Criar usuário -->
         <activity
             android:name=".CriarUsuarioActivity"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
-        <!-- Gerenciar usuários (admin) -->
+        <!-- Gerenciar usuários -->
         <activity
             android:name=".GerenciarUsuariosActivity"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
-        <!-- Lista de conteúdos (admin) -->
-        <activity
-            android:name=".ConteudosActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"/>
-
-        <!-- Criar conteúdo (admin) -->
+        <!-- Criar conteúdo -->
         <activity
             android:name=".CriarConteudoActivity"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
-        <!-- Lista de conteúdos de uma cidade -->
+        <!-- Conteúdos por cidade -->
         <activity
             android:name=".ConteudosCidadeActivity"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
-        <!-- Criar cidade (admin) -->
+        <!-- Criar cidade -->
         <activity
             android:name=".CriarCidadeActivity"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <!-- Detalhe do conteúdo -->
         <activity
             android:name=".DetalheConteudoActivity"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
     </application>
 

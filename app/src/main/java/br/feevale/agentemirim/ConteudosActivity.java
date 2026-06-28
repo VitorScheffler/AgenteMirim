@@ -27,7 +27,10 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -43,13 +46,18 @@ public class ConteudosActivity extends AppCompatActivity {
     private ImageView            ivMenu;
     private DrawerLayout         drawerLayout;
     private NavigationView       navAdmin;
+    private TextView             txtBoasVindas; // ← NOVO
 
     // ── Dados ─────────────────────────────────────────────────────────────────
-    private boolean isAdmin = false;
+    private boolean      isAdmin          = false;
+    private boolean      modoFavoritos    = false;
+    private Set<String>  favoritoIds      = new HashSet<>();
 
-    // ── Firebase ──────────────────────────────────────────────────────────────
+    // ── Firebase / Manager ────────────────────────────────────────────────────
     private FirebaseFirestore    db;
+    private FavoritosManager     favoritosManager;
     private ListenerRegistration listenerCidades;
+    private ListenerRegistration listenerFavoritos;
     private CidadeAdapter        adapter;
 
     private static final String AUTH_TOKEN = "-R,V*ox+>K,0o76MH=XYNG9.sRz@xLLR";
@@ -63,7 +71,8 @@ public class ConteudosActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conteudos);
 
-        db = FirebaseFirestore.getInstance();
+        db               = FirebaseFirestore.getInstance();
+        favoritosManager = new FavoritosManager(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -72,6 +81,7 @@ public class ConteudosActivity extends AppCompatActivity {
         bindViews();
         configurarAcoes();
         verificarPerfil();
+        iniciarListenerFavoritos();
     }
 
     @Override
@@ -81,17 +91,26 @@ public class ConteudosActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // Atualiza saudação e visibilidade do menu admin ao voltar de outra tela
+        atualizarBoasVindas();
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
-        if (listenerCidades != null) { listenerCidades.remove(); listenerCidades = null; }
+        if (listenerCidades   != null) { listenerCidades.remove();   listenerCidades   = null; }
+        if (listenerFavoritos != null) { listenerFavoritos.remove(); listenerFavoritos = null; }
     }
 
     @Override
     public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+        if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            // Tela raiz — minimiza o app em vez de fechar
+            moveTaskToBack(true);
         }
     }
 
@@ -107,6 +126,7 @@ public class ConteudosActivity extends AppCompatActivity {
         ivMenu             = findViewById(R.id.ivMenu);
         drawerLayout       = findViewById(R.id.drawerLayout);
         navAdmin           = findViewById(R.id.navAdmin);
+        txtBoasVindas      = findViewById(R.id.txtBoasVindas); // ← NOVO
 
         recyclerCidades.setLayoutManager(new LinearLayoutManager(this));
         fabAdicionarCidade.setVisibility(View.GONE);
@@ -114,60 +134,120 @@ public class ConteudosActivity extends AppCompatActivity {
     }
 
     private void configurarAcoes() {
-        // Ícone de usuário → abre menu popup
         findViewById(R.id.ivUsuario).setOnClickListener(this::exibirMenuUsuario);
 
-        // Card "Todas as cidades"
         findViewById(R.id.cardTodasCidades).setOnClickListener(v -> {
-            Intent intent = new Intent(this, ConteudosCidadeActivity.class);
-            intent.putExtra("cidadeId",        "todas");
-            intent.putExtra("cidadeNome",      "Todos os conteúdos");
-            intent.putExtra("cidadeDescricao", "Conteúdos de todas as cidades disponíveis.");
-            startActivity(intent);
+            modoFavoritos = false;
+            atualizarEstadoCards();
+            if (adapter != null) adapter.setFiltroFavoritos(false, favoritoIds);
         });
 
-        // Card "Minhas cidades"
         findViewById(R.id.cardMinhasCidades).setOnClickListener(v -> {
-            // TODO: implementar seleção de cidades favoritas
+            modoFavoritos = true;
+            atualizarEstadoCards();
+            if (adapter != null) adapter.setFiltroFavoritos(true, favoritoIds);
         });
 
-        // FAB admin → adicionar cidade
         fabAdicionarCidade.setOnClickListener(v ->
                 startActivity(new Intent(this, CriarCidadeActivity.class)));
 
-        // Hambúrguer → abre o drawer
         ivMenu.setOnClickListener(v ->
                 drawerLayout.openDrawer(GravityCompat.START));
 
-        // Itens do menu lateral
         navAdmin.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.action_gerenciar_usuarios) {
+            if (id == R.id.action_gerenciar_usuarios)
                 startActivity(new Intent(this, GerenciarUsuariosActivity.class));
-            } else if (id == R.id.action_criar_usuario) {
+            else if (id == R.id.action_criar_usuario)
                 startActivity(new Intent(this, CriarUsuarioActivity.class));
-            }
             drawerLayout.closeDrawer(GravityCompat.START);
             return true;
         });
     }
 
+    private void atualizarEstadoCards() {
+        findViewById(R.id.cardTodasCidades).setAlpha(modoFavoritos ? 0.55f : 1f);
+        findViewById(R.id.cardMinhasCidades).setAlpha(modoFavoritos ? 1f : 0.55f);
+    }
+
     // =========================================================================
-    // PERFIL
+    // BOAS-VINDAS  (absorvido da MainActivity)
+    // =========================================================================
+
+    private void atualizarBoasVindas() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user != null) {
+            db.collection("usuarios").document(user.getUid()).get()
+                    .addOnSuccessListener(doc -> {
+                        if (txtBoasVindas != null) {
+                            String nome = doc.getString("nome");
+                            txtBoasVindas.setText((nome != null && !nome.isEmpty())
+                                    ? "Olá, " + nome.split(" ")[0] + "! 👋"
+                                    : "Olá, Agente Mirim! 👋");
+                        }
+                        isAdmin = doc.exists() && "admin".equals(doc.getString("perfil"));
+                        fabAdicionarCidade.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+                        ivMenu.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+                    });
+        } else {
+            if (txtBoasVindas != null) txtBoasVindas.setText("Olá, Agente Mirim! 👋");
+            isAdmin = false;
+            fabAdicionarCidade.setVisibility(View.GONE);
+            ivMenu.setVisibility(View.GONE);
+        }
+    }
+
+    // =========================================================================
+    // PERFIL  (mantido para configurar FAB/menu no onCreate)
     // =========================================================================
 
     private void verificarPerfil() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) return;
+        // Delega para atualizarBoasVindas que já faz tudo
+        atualizarBoasVindas();
+    }
 
-        db.collection("usuarios").document(user.getUid()).get()
-                .addOnSuccessListener(doc -> {
-                    String perfil = doc.exists() && doc.getString("perfil") != null
-                            ? doc.getString("perfil") : "usuario";
-                    isAdmin = "admin".equals(perfil);
-                    fabAdicionarCidade.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
-                    ivMenu.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
-                });
+    // =========================================================================
+    // FAVORITOS
+    // =========================================================================
+
+    private void iniciarListenerFavoritos() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user != null) {
+            listenerFavoritos = db.collection("usuarios")
+                    .document(user.getUid())
+                    .collection("favoritos")
+                    .addSnapshotListener((snapshot, error) -> {
+                        if (error != null || snapshot == null) return;
+                        favoritoIds.clear();
+                        for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                            favoritoIds.add(doc.getId());
+                        }
+                        if (adapter != null) {
+                            adapter.atualizarFavoritos(favoritoIds);
+                            if (modoFavoritos) adapter.setFiltroFavoritos(true, favoritoIds);
+                        }
+                    });
+        } else {
+            favoritoIds.clear();
+            favoritoIds.addAll(favoritosManager.lerFavoritosLocais());
+            if (adapter != null) adapter.atualizarFavoritos(favoritoIds);
+        }
+    }
+
+    private void toggleFavorito(String cidadeId, boolean eraFavorito) {
+        favoritosManager.toggle(cidadeId, eraFavorito, null);
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            if (eraFavorito) favoritoIds.remove(cidadeId);
+            else             favoritoIds.add(cidadeId);
+            if (adapter != null) {
+                adapter.atualizarFavoritos(favoritoIds);
+                if (modoFavoritos) adapter.setFiltroFavoritos(true, favoritoIds);
+            }
+        }
     }
 
     // =========================================================================
@@ -211,19 +291,28 @@ public class ConteudosActivity extends AppCompatActivity {
                 .setMessage("Deseja sair da sua conta?")
                 .setPositiveButton("Sair", (dialog, which) -> {
                     FirebaseAuth.getInstance().signOut();
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
+
+                    // Limpa estado
+                    favoritoIds.clear();
+                    modoFavoritos = false;
+                    isAdmin = false;
+                    atualizarEstadoCards();
+
+                    // Recarrega favoritos locais
+                    favoritoIds.addAll(favoritosManager.lerFavoritosLocais());
+                    if (adapter != null) adapter.atualizarFavoritos(favoritoIds);
+
+                    // Remove listener de favoritos do Firestore
+                    if (listenerFavoritos != null) {
+                        listenerFavoritos.remove();
+                        listenerFavoritos = null;
+                    }
+
+                    // Atualiza boas-vindas e visibilidade do menu
+                    atualizarBoasVindas();
                 })
                 .setNegativeButton("Cancelar", null)
                 .show();
-    }
-
-    private void fazerLogout() {
-        FirebaseAuth.getInstance().signOut();
-        isAdmin = false;
-        fabAdicionarCidade.setVisibility(View.GONE);
-        ivMenu.setVisibility(View.GONE);
     }
 
     // =========================================================================
@@ -238,13 +327,18 @@ public class ConteudosActivity extends AppCompatActivity {
                 .addSnapshotListener((snapshot, error) -> {
                     setCarregando(false);
                     if (error != null || snapshot == null) { exibirVazio(); return; }
+
                     List<DocumentSnapshot> docs = snapshot.getDocuments();
                     if (docs.isEmpty()) { exibirVazio(); return; }
 
                     layoutVazio.setVisibility(View.GONE);
                     recyclerCidades.setVisibility(View.VISIBLE);
+
                     adapter = new CidadeAdapter(docs);
                     recyclerCidades.setAdapter(adapter);
+
+                    adapter.atualizarFavoritos(favoritoIds);
+                    if (modoFavoritos) adapter.setFiltroFavoritos(true, favoritoIds);
                 });
     }
 
@@ -272,9 +366,60 @@ public class ConteudosActivity extends AppCompatActivity {
 
     class CidadeAdapter extends RecyclerView.Adapter<CidadeAdapter.VH> {
 
-        private final List<DocumentSnapshot> lista;
+        private final List<DocumentSnapshot> listaOriginal;
+        private final List<DocumentSnapshot> listaExibida;
+        private Set<String> favs               = new HashSet<>();
+        private boolean     filtrandoFavoritos = false;
 
-        CidadeAdapter(List<DocumentSnapshot> lista) { this.lista = lista; }
+        CidadeAdapter(List<DocumentSnapshot> lista) {
+            this.listaOriginal = new ArrayList<>(lista);
+            this.listaExibida  = new ArrayList<>(lista);
+        }
+
+        void atualizarFavoritos(Set<String> novosFavs) {
+            this.favs = new HashSet<>(novosFavs);
+            notifyDataSetChanged();
+        }
+
+        void setFiltroFavoritos(boolean ativo, Set<String> novosFavs) {
+            this.filtrandoFavoritos = ativo;
+            this.favs = new HashSet<>(novosFavs);
+            aplicarFiltro();
+        }
+
+        private void aplicarFiltro() {
+            listaExibida.clear();
+
+            if (filtrandoFavoritos) {
+                for (DocumentSnapshot doc : listaOriginal) {
+                    if (favs.contains(doc.getId())) listaExibida.add(doc);
+                }
+            } else {
+                listaExibida.addAll(listaOriginal);
+            }
+
+            if (listaExibida.isEmpty() && filtrandoFavoritos) {
+                recyclerCidades.setVisibility(View.GONE);
+                layoutVazio.setVisibility(View.VISIBLE);
+                if (layoutVazio.findViewWithTag("txtVazioFav") == null) {
+                    TextView tv = new TextView(ConteudosActivity.this);
+                    tv.setTag("txtVazioFav");
+                    tv.setText("Você ainda não tem cidades favoritas.\nToque na ⭐ em qualquer cidade para salvar.");
+                    tv.setTextSize(13f);
+                    tv.setTextColor(0xFFBDBDBD);
+                    tv.setGravity(android.view.Gravity.CENTER);
+                    tv.setPadding(48, 16, 48, 0);
+                    ((LinearLayout) layoutVazio).addView(tv);
+                }
+            } else {
+                View tvFav = layoutVazio.findViewWithTag("txtVazioFav");
+                if (tvFav != null) ((LinearLayout) layoutVazio).removeView(tvFav);
+                layoutVazio.setVisibility(View.GONE);
+                recyclerCidades.setVisibility(View.VISIBLE);
+            }
+
+            notifyDataSetChanged();
+        }
 
         @Override
         public VH onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -285,9 +430,9 @@ public class ConteudosActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(VH holder, int position) {
-            DocumentSnapshot doc = lista.get(position);
+            DocumentSnapshot doc = listaExibida.get(position);
 
-            String nome      = doc.getString("nome")     != null ? doc.getString("nome")     : "";
+            String nome      = doc.getString("nome")      != null ? doc.getString("nome")      : "";
             String imagemUrl = doc.getString("imagemUrl");
             Long   qtd       = doc.getLong("qtdConteudos");
 
@@ -303,19 +448,28 @@ public class ConteudosActivity extends AppCompatActivity {
                 holder.ivThumb.setColorFilter(0x44FFFFFF);
             }
 
+            boolean isFav = favs.contains(doc.getId());
+            holder.ivFavorito.setImageResource(
+                    isFav ? android.R.drawable.btn_star_big_on
+                            : android.R.drawable.btn_star_big_off);
+
+            holder.ivFavorito.setOnClickListener(v ->
+                    toggleFavorito(doc.getId(), favs.contains(doc.getId())));
+
             holder.itemView.setOnClickListener(v -> abrirCidade(doc));
         }
 
-        @Override public int getItemCount() { return lista.size(); }
+        @Override public int getItemCount() { return listaExibida.size(); }
 
         class VH extends RecyclerView.ViewHolder {
             TextView  txtNome, txtQtd;
-            ImageView ivThumb;
+            ImageView ivThumb, ivFavorito;
             VH(View v) {
                 super(v);
-                txtNome = v.findViewById(R.id.txtNomeCidade);
-                txtQtd  = v.findViewById(R.id.txtQtdConteudos);
-                ivThumb = v.findViewById(R.id.ivCidadeThumb);
+                txtNome    = v.findViewById(R.id.txtNomeCidade);
+                txtQtd     = v.findViewById(R.id.txtQtdConteudos);
+                ivThumb    = v.findViewById(R.id.ivCidadeThumb);
+                ivFavorito = v.findViewById(R.id.ivFavorito);
             }
         }
     }
@@ -329,9 +483,6 @@ public class ConteudosActivity extends AppCompatActivity {
                 .addHeader("Authorization", "Bearer " + AUTH_TOKEN)
                 .addHeader("ngrok-skip-browser-warning", "true")
                 .build());
-
-        Glide.with(this)
-                .load(glideUrl)
-                .into(iv);
+        Glide.with(this).load(glideUrl).into(iv);
     }
 }

@@ -119,7 +119,7 @@ public class CompletarPerfilActivity extends AppCompatActivity {
                 .set(dados, SetOptions.merge())
                 .addOnSuccessListener(v -> {
                     setCarregando(false);
-                    Intent intent = new Intent(this, MainActivity.class);
+                    Intent intent = new Intent(this, ConteudosActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     finish();

@@ -26,14 +26,16 @@ public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth      mAuth;
     private FirebaseFirestore db;
+    private FavoritosManager  favoritosManager; // ← NOVO
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        mAuth = FirebaseAuth.getInstance();
-        db    = FirebaseFirestore.getInstance();
+        mAuth            = FirebaseAuth.getInstance();
+        db               = FirebaseFirestore.getInstance();
+        favoritosManager = new FavoritosManager(this); // ← NOVO
 
         layoutEmail     = findViewById(R.id.layoutEmail);
         layoutSenha     = findViewById(R.id.layoutSenha);
@@ -46,20 +48,13 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> login());
         txtEsqueciSenha.setOnClickListener(v ->
                 startActivity(new Intent(this, RecuperarSenhaActivity.class)));
-
-        // ❌ REMOVIDO: bloqueio do botão voltar
-        // O usuário pode fechar a tela de login e continuar navegando sem conta
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        // ❌ REMOVIDO: redirecionamento automático para MainActivity
-        // Se o usuário já estiver logado e abrir a tela de login manualmente,
-        // simplesmente mostramos a tela — ele pode voltar ou fazer logout.
         FirebaseUser usuario = mAuth.getCurrentUser();
         if (usuario != null) {
-            // Já logado: vai direto para o perfil/MainActivity sem forçar nada
             verificarPerfil(usuario);
         }
     }
@@ -77,7 +72,16 @@ public class LoginActivity extends AppCompatActivity {
         setCarregando(true);
 
         mAuth.signInWithEmailAndPassword(email, senha)
-                .addOnSuccessListener(result -> verificarPerfil(result.getUser()))
+                .addOnSuccessListener(result -> {
+                    // ── Migra favoritos salvos localmente antes do login ──────
+                    FirebaseUser user = result.getUser();
+                    if (user != null) {
+                        favoritosManager.migrarFavoritosLocaisParaFirestore(
+                                user.getUid(),
+                                () -> verificarPerfil(user) // só navega após migrar
+                        );
+                    }
+                })
                 .addOnFailureListener(e -> {
                     setCarregando(false);
                     layoutSenha.setError("E-mail ou senha incorretos");
@@ -97,7 +101,7 @@ public class LoginActivity extends AppCompatActivity {
                     boolean completo = doc.exists()
                             && Boolean.TRUE.equals(doc.getBoolean("perfilCompleto"));
 
-                    irPara(completo ? MainActivity.class : CompletarPerfilActivity.class);
+                    irPara(completo ? ConteudosActivity.class : CompletarPerfilActivity.class);
                 })
                 .addOnFailureListener(e -> {
                     setCarregando(false);
@@ -107,8 +111,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private void irPara(Class<?> destino) {
         Intent intent = new Intent(this, destino);
-        // ✅ Sem FLAG_ACTIVITY_CLEAR_TASK — mantém a back stack para o usuário
-        //    poder voltar ao conteúdo depois de logar
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
         finish();

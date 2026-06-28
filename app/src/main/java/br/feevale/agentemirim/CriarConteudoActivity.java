@@ -34,40 +34,50 @@ import com.google.firebase.firestore.Query;
 
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import br.feevale.agentemirim.api.ApiClient;
 
-/**
- * Tela de criação de conteúdo com:
- *  - Título e descrição
- *  - Seleção de tipo (Dica/Vídeo/Notícia/Outro)
- *  - Upload de imagem de capa
- *  - Upload de arquivo (PDF, vídeo, imagem)
- *  - Vincula ao cidadeId passado via Intent
- *
- * Destino: app/src/main/java/br/feevale/agentemirim/CriarConteudoActivity.java
- */
 public class CriarConteudoActivity extends AppCompatActivity {
 
+    private static final int MAX_ARQUIVOS = 5;
+
+    // ── Categorias disponíveis ─────────────────────────────────────────────────
+    private static final String CAT_ENCHENTE     = "enchente";
+    private static final String CAT_DESLIZAMENTO = "deslizamento";
+    private static final String CAT_TEMPESTADE   = "tempestade";
+    private static final String CAT_OUTROS       = "outros";
+
     // ── Views: texto ──────────────────────────────────────────────────────────
-    private TextInputLayout   layoutTitulo, layoutDescricao;
-    private TextInputEditText editTitulo, editDescricao;
+    private TextInputLayout   layoutTitulo, layoutDescricao, layoutTexto;
+    private TextInputEditText editTitulo, editDescricao, editTexto;
 
     // ── Views: tipo ───────────────────────────────────────────────────────────
-    private LinearLayout btnTipoDica, btnTipoVideo, btnTipoNoticia, btnTipoOutro;
+    private LinearLayout btnTipoDica, btnTipoVideo, btnTipoNoticia, btnTipoMaterial;
+
+    // ── Views: categorias ─────────────────────────────────────────────────────
+    private LinearLayout chipEnchente, chipDeslizamento, chipTempestade, chipOutros;
+    private TextView     lblEnchente, lblDeslizamento, lblTempestade, lblOutros;
+    private TextView     txtCategoriasErro;
 
     // ── Views: capa ───────────────────────────────────────────────────────────
     private LinearLayout layoutUploadCapa;
+    private View         cardPreviewCapa;
     private ImageView    ivPreviewCapa;
-    private TextView     txtNomeCapa;
+    private TextView     btnRemoverCapa;
 
-    // ── Views: arquivo ────────────────────────────────────────────────────────
+    // ── Views: arquivos ───────────────────────────────────────────────────────
     private LinearLayout layoutUploadArquivo;
-    private LinearLayout layoutArquivoSelecionado;
+    private LinearLayout layoutArquivosSelecionados;
+    private TextView     txtContadorArquivos;
 
     // ── Views: geral ──────────────────────────────────────────────────────────
     private MaterialButton btnSalvar;
@@ -75,21 +85,37 @@ public class CriarConteudoActivity extends AppCompatActivity {
     private TextView       txtProgresso;
 
     // ── Estado ────────────────────────────────────────────────────────────────
-    private String tipoSelecionado = "dica";
+    private String       tipoSelecionado  = "dica";
+    private Set<String>  categoriasSelecionadas = new HashSet<>();
 
+    // Capa
     private Uri    capaUri  = null;
     private String capaNome = null;
     private String capaMime = null;
 
-    private Uri    arquivoUri  = null;
-    private String arquivoNome = null;
-    private String arquivoMime = null;
+    // Lista de arquivos (múltiplos)
+    private final List<ArquivoSelecionado> arquivos = new ArrayList<>();
 
-    // ── Dados da cidade (recebidos via Intent) ────────────────────────────────
+    // ── Dados da cidade ───────────────────────────────────────────────────────
     private String cidadeId   = null;
     private String cidadeNome = null;
 
     private FirebaseFirestore db;
+
+    // ── Modelo interno ────────────────────────────────────────────────────────
+    static class ArquivoSelecionado {
+        Uri    uri;
+        String nome;
+        String mime;
+        String uploadUrl;
+        String uploadId;
+
+        ArquivoSelecionado(Uri uri, String nome, String mime) {
+            this.uri  = uri;
+            this.nome = nome;
+            this.mime = mime;
+        }
+    }
 
     // ── Launchers ─────────────────────────────────────────────────────────────
     private final ActivityResultLauncher<Intent> capaPickerLauncher =
@@ -135,13 +161,26 @@ public class CriarConteudoActivity extends AppCompatActivity {
 
         bindViews();
         configurarTipos();
+        configurarCategorias();
 
         layoutUploadCapa.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         layoutUploadArquivo.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
         layoutUploadCapa.setOnClickListener(v -> abrirCapaPicker());
-        layoutUploadArquivo.setOnClickListener(v -> abrirArquivoPicker());
+        btnRemoverCapa.setOnClickListener(v -> removerCapa());
+        layoutUploadArquivo.setOnClickListener(v -> {
+            if (arquivos.size() >= MAX_ARQUIVOS) {
+                new AlertDialog.Builder(this)
+                        .setTitle("Limite atingido")
+                        .setMessage("Você pode adicionar no máximo " + MAX_ARQUIVOS + " arquivos.")
+                        .setPositiveButton("OK", null).show();
+                return;
+            }
+            abrirArquivoPicker();
+        });
+
         btnSalvar.setOnClickListener(v -> publicar());
+        atualizarContadorArquivos();
     }
 
     // =========================================================================
@@ -149,22 +188,35 @@ public class CriarConteudoActivity extends AppCompatActivity {
     // =========================================================================
 
     private void bindViews() {
-        layoutTitulo             = findViewById(R.id.layoutTitulo);
-        layoutDescricao          = findViewById(R.id.layoutDescricao);
-        editTitulo               = findViewById(R.id.editTitulo);
-        editDescricao            = findViewById(R.id.editDescricao);
-        btnTipoDica              = findViewById(R.id.btnTipoDica);
-        btnTipoVideo             = findViewById(R.id.btnTipoVideo);
-        btnTipoNoticia           = findViewById(R.id.btnTipoNoticia);
-        btnTipoOutro             = findViewById(R.id.btnTipoOutro);
-        layoutUploadCapa         = findViewById(R.id.layoutUploadCapa);
-        ivPreviewCapa            = findViewById(R.id.ivPreviewCapa);
-        txtNomeCapa              = findViewById(R.id.txtNomeCapa);
-        layoutUploadArquivo      = findViewById(R.id.layoutUploadArquivo);
-        layoutArquivoSelecionado = findViewById(R.id.layoutArquivosSelecionados);
-        btnSalvar                = findViewById(R.id.btnSalvar);
-        progressBar              = findViewById(R.id.progressBar);
-        txtProgresso             = findViewById(R.id.txtProgresso);
+        layoutTitulo               = findViewById(R.id.layoutTitulo);
+        layoutDescricao            = findViewById(R.id.layoutDescricao);
+        layoutTexto                = findViewById(R.id.layoutTexto);
+        editTitulo                 = findViewById(R.id.editTitulo);
+        editDescricao              = findViewById(R.id.editDescricao);
+        editTexto                  = findViewById(R.id.editTexto);
+        btnTipoDica                = findViewById(R.id.btnTipoDica);
+        btnTipoVideo               = findViewById(R.id.btnTipoVideo);
+        btnTipoNoticia             = findViewById(R.id.btnTipoNoticia);
+        btnTipoMaterial            = findViewById(R.id.btnTipoMaterial);
+        chipEnchente               = findViewById(R.id.chipEnchente);
+        chipDeslizamento           = findViewById(R.id.chipDeslizamento);
+        chipTempestade             = findViewById(R.id.chipTempestade);
+        chipOutros                 = findViewById(R.id.chipOutros);
+        lblEnchente                = findViewById(R.id.lblEnchente);
+        lblDeslizamento            = findViewById(R.id.lblDeslizamento);
+        lblTempestade              = findViewById(R.id.lblTempestade);
+        lblOutros                  = findViewById(R.id.lblOutros);
+        txtCategoriasErro          = findViewById(R.id.txtCategoriasErro);
+        layoutUploadCapa           = findViewById(R.id.layoutUploadCapa);
+        cardPreviewCapa            = findViewById(R.id.cardPreviewCapa);
+        ivPreviewCapa              = findViewById(R.id.ivPreviewCapa);
+        btnRemoverCapa             = findViewById(R.id.btnRemoverCapa);
+        layoutUploadArquivo        = findViewById(R.id.layoutUploadArquivo);
+        layoutArquivosSelecionados = findViewById(R.id.layoutArquivosSelecionados);
+        txtContadorArquivos        = findViewById(R.id.txtContadorArquivos);
+        btnSalvar                  = findViewById(R.id.btnSalvar);
+        progressBar                = findViewById(R.id.progressBar);
+        txtProgresso               = findViewById(R.id.txtProgresso);
     }
 
     // =========================================================================
@@ -173,18 +225,18 @@ public class CriarConteudoActivity extends AppCompatActivity {
 
     private void configurarTipos() {
         selecionarTipo("dica");
-        btnTipoDica.setOnClickListener(v    -> selecionarTipo("dica"));
-        btnTipoVideo.setOnClickListener(v   -> selecionarTipo("video"));
-        btnTipoNoticia.setOnClickListener(v -> selecionarTipo("noticia"));
-        btnTipoOutro.setOnClickListener(v   -> selecionarTipo("outro"));
+        btnTipoDica.setOnClickListener(v     -> selecionarTipo("dica"));
+        btnTipoVideo.setOnClickListener(v    -> selecionarTipo("video"));
+        btnTipoNoticia.setOnClickListener(v  -> selecionarTipo("noticia"));
+        btnTipoMaterial.setOnClickListener(v -> selecionarTipo("material"));
     }
 
     private void selecionarTipo(String tipo) {
         tipoSelecionado = tipo;
-        atualizarVisualTipo(btnTipoDica,    "dica");
-        atualizarVisualTipo(btnTipoVideo,   "video");
-        atualizarVisualTipo(btnTipoNoticia, "noticia");
-        atualizarVisualTipo(btnTipoOutro,   "outro");
+        atualizarVisualTipo(btnTipoDica,     "dica");
+        atualizarVisualTipo(btnTipoVideo,    "video");
+        atualizarVisualTipo(btnTipoNoticia,  "noticia");
+        atualizarVisualTipo(btnTipoMaterial, "material");
     }
 
     private void atualizarVisualTipo(LinearLayout btn, String tipo) {
@@ -195,16 +247,47 @@ public class CriarConteudoActivity extends AppCompatActivity {
         bg.setColor(ativo ? 0xFFE8F5E9 : 0xFFFAFAFA);
         bg.setStroke(ativo ? dp(2) : dp(1), ativo ? 0xFF2E7D32 : 0xFFE0E0E0);
         btn.setBackground(bg);
-
-        if (btn.getChildCount() >= 1 && btn.getChildAt(0) instanceof ImageView) {
-            ((ImageView) btn.getChildAt(0))
-                    .setColorFilter(ativo ? 0xFF2E7D32 : 0xFF9E9E9E);
-        }
+        if (btn.getChildCount() >= 1 && btn.getChildAt(0) instanceof ImageView)
+            ((ImageView) btn.getChildAt(0)).setColorFilter(ativo ? 0xFF2E7D32 : 0xFF9E9E9E);
         if (btn.getChildCount() >= 2 && btn.getChildAt(1) instanceof TextView) {
             TextView lbl = (TextView) btn.getChildAt(1);
             lbl.setTextColor(ativo ? 0xFF2E7D32 : 0xFF9E9E9E);
             lbl.setTypeface(null, ativo ? Typeface.BOLD : Typeface.NORMAL);
         }
+    }
+
+    // =========================================================================
+    // CATEGORIAS (múltipla seleção)
+    // =========================================================================
+
+    private void configurarCategorias() {
+        chipEnchente.setOnClickListener(v     -> toggleCategoria(CAT_ENCHENTE,     chipEnchente,     lblEnchente));
+        chipDeslizamento.setOnClickListener(v -> toggleCategoria(CAT_DESLIZAMENTO, chipDeslizamento, lblDeslizamento));
+        chipTempestade.setOnClickListener(v   -> toggleCategoria(CAT_TEMPESTADE,   chipTempestade,   lblTempestade));
+        chipOutros.setOnClickListener(v       -> toggleCategoria(CAT_OUTROS,       chipOutros,       lblOutros));
+    }
+
+    private void toggleCategoria(String cat, LinearLayout chip, TextView label) {
+        txtCategoriasErro.setVisibility(View.GONE);
+
+        boolean eraSelecionado = categoriasSelecionadas.contains(cat);
+        if (eraSelecionado) {
+            categoriasSelecionadas.remove(cat);
+        } else {
+            categoriasSelecionadas.add(cat);
+        }
+        atualizarVisualCategoria(chip, label, !eraSelecionado);
+    }
+
+    private void atualizarVisualCategoria(LinearLayout chip, TextView label, boolean ativo) {
+        GradientDrawable bg = new GradientDrawable();
+        bg.setShape(GradientDrawable.RECTANGLE);
+        bg.setCornerRadius(dp(12));
+        bg.setColor(ativo ? 0xFFE8F5E9 : 0xFFFAFAFA);
+        bg.setStroke(ativo ? dp(2) : dp(1), ativo ? 0xFF2E7D32 : 0xFFE0E0E0);
+        chip.setBackground(bg);
+        label.setTextColor(ativo ? 0xFF2E7D32 : 0xFF9E9E9E);
+        label.setTypeface(null, ativo ? Typeface.BOLD : Typeface.NORMAL);
     }
 
     // =========================================================================
@@ -225,16 +308,23 @@ public class CriarConteudoActivity extends AppCompatActivity {
         try (InputStream is = getContentResolver().openInputStream(uri)) {
             Bitmap bmp = BitmapFactory.decodeStream(is);
             ivPreviewCapa.setImageBitmap(bmp);
-            ivPreviewCapa.setVisibility(View.VISIBLE);
         } catch (Exception ignored) {}
 
-        txtNomeCapa.setText(capaNome);
-        txtNomeCapa.setVisibility(View.VISIBLE);
+        cardPreviewCapa.setVisibility(View.VISIBLE);
         layoutUploadCapa.setVisibility(View.GONE);
     }
 
+    private void removerCapa() {
+        capaUri  = null;
+        capaNome = null;
+        capaMime = null;
+        ivPreviewCapa.setImageBitmap(null);
+        cardPreviewCapa.setVisibility(View.GONE);
+        layoutUploadCapa.setVisibility(View.VISIBLE);
+    }
+
     // =========================================================================
-    // ARQUIVO
+    // ARQUIVOS (múltiplos)
     // =========================================================================
 
     private void abrirArquivoPicker() {
@@ -248,18 +338,24 @@ public class CriarConteudoActivity extends AppCompatActivity {
     }
 
     private void processarArquivo(Uri uri) {
-        arquivoUri  = uri;
-        arquivoMime = getContentResolver().getType(uri);
-        arquivoNome = resolverNome(uri);
+        String mime = getContentResolver().getType(uri);
+        String nome = resolverNome(uri);
 
-        layoutArquivoSelecionado.removeAllViews();
-        layoutArquivoSelecionado.setVisibility(View.VISIBLE);
-        adicionarItemArquivo(arquivoNome, arquivoMime);
-        layoutUploadArquivo.setVisibility(View.GONE);
+        ArquivoSelecionado arq = new ArquivoSelecionado(uri, nome, mime);
+        arquivos.add(arq);
+
+        adicionarItemArquivoNaLista(arq);
+        atualizarContadorArquivos();
+
+        if (arquivos.size() >= MAX_ARQUIVOS) {
+            layoutUploadArquivo.setVisibility(View.GONE);
+        }
+        layoutArquivosSelecionados.setVisibility(View.VISIBLE);
     }
 
-    private void adicionarItemArquivo(String nome, String mime) {
+    private void adicionarItemArquivoNaLista(ArquivoSelecionado arq) {
         LinearLayout row = new LinearLayout(this);
+        row.setTag(arq);
         row.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams rowLp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -274,35 +370,32 @@ public class CriarConteudoActivity extends AppCompatActivity {
         row.setBackground(rowBg);
         row.setPadding(dp(12), dp(10), dp(12), dp(10));
 
-        // Chip tipo
         TextView chip = new TextView(this);
         LinearLayout.LayoutParams chipLp = new LinearLayout.LayoutParams(dp(40), dp(22));
         chipLp.rightMargin = dp(10);
         chip.setLayoutParams(chipLp);
         chip.setGravity(android.view.Gravity.CENTER);
-        chip.setText(chipLabel(mime));
+        chip.setText(chipLabel(arq.mime));
         chip.setTextSize(9f);
         chip.setTextColor(Color.WHITE);
         chip.setTypeface(null, Typeface.BOLD);
         GradientDrawable chipBg = new GradientDrawable();
         chipBg.setShape(GradientDrawable.RECTANGLE);
         chipBg.setCornerRadius(dp(4));
-        chipBg.setColor(corChip(mime));
+        chipBg.setColor(corChip(arq.mime));
         chip.setBackground(chipBg);
         row.addView(chip);
 
-        // Nome
         TextView txtNome = new TextView(this);
-        txtNome.setLayoutParams(new LinearLayout.LayoutParams(0,
-                LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-        txtNome.setText(nome);
+        txtNome.setLayoutParams(new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        txtNome.setText(arq.nome);
         txtNome.setTextSize(13f);
         txtNome.setTextColor(0xFF1A1A1A);
         txtNome.setMaxLines(1);
         txtNome.setEllipsize(android.text.TextUtils.TruncateAt.MIDDLE);
         row.addView(txtNome);
 
-        // Remover
         TextView btnRemover = new TextView(this);
         btnRemover.setLayoutParams(new LinearLayout.LayoutParams(dp(32), dp(32)));
         btnRemover.setGravity(android.view.Gravity.CENTER);
@@ -310,17 +403,29 @@ public class CriarConteudoActivity extends AppCompatActivity {
         btnRemover.setTextSize(14f);
         btnRemover.setTextColor(0xFFE53935);
         btnRemover.setTypeface(null, Typeface.BOLD);
-        btnRemover.setOnClickListener(v -> {
-            arquivoUri  = null;
-            arquivoNome = null;
-            arquivoMime = null;
-            layoutArquivoSelecionado.removeAllViews();
-            layoutArquivoSelecionado.setVisibility(View.GONE);
-            layoutUploadArquivo.setVisibility(View.VISIBLE);
-        });
+        btnRemover.setOnClickListener(v -> removerArquivo(arq, row));
         row.addView(btnRemover);
 
-        layoutArquivoSelecionado.addView(row);
+        layoutArquivosSelecionados.addView(row);
+    }
+
+    private void removerArquivo(ArquivoSelecionado arq, View row) {
+        arquivos.remove(arq);
+        layoutArquivosSelecionados.removeView(row);
+        atualizarContadorArquivos();
+
+        if (arquivos.size() < MAX_ARQUIVOS) {
+            layoutUploadArquivo.setVisibility(View.VISIBLE);
+        }
+        if (arquivos.isEmpty()) {
+            layoutArquivosSelecionados.setVisibility(View.GONE);
+        }
+    }
+
+    private void atualizarContadorArquivos() {
+        txtContadorArquivos.setText(arquivos.size() + " / " + MAX_ARQUIVOS);
+        txtContadorArquivos.setTextColor(
+                arquivos.size() >= MAX_ARQUIVOS ? 0xFFE53935 : 0xFF9E9E9E);
     }
 
     // =========================================================================
@@ -330,81 +435,80 @@ public class CriarConteudoActivity extends AppCompatActivity {
     private void publicar() {
         layoutTitulo.setError(null);
         layoutDescricao.setError(null);
+        layoutTexto.setError(null);
+        txtCategoriasErro.setVisibility(View.GONE);
 
-        String titulo    = editTitulo.getText()    != null ? editTitulo.getText().toString().trim()    : "";
+        String titulo    = editTitulo.getText()    != null ? editTitulo.getText().toString().trim() : "";
         String descricao = editDescricao.getText() != null ? editDescricao.getText().toString().trim() : "";
+        String texto     = editTexto.getText()     != null ? editTexto.getText().toString().trim() : "";
 
-        if (TextUtils.isEmpty(titulo))    { layoutTitulo.setError("Informe o título");     return; }
-        if (TextUtils.isEmpty(descricao)) { layoutDescricao.setError("Informe a descrição"); return; }
+        if (TextUtils.isEmpty(titulo))             { layoutTitulo.setError("Informe o título");            return; }
+        if (TextUtils.isEmpty(descricao))          { layoutDescricao.setError("Informe a descrição");      return; }
+        if (TextUtils.isEmpty(texto))              { layoutTexto.setError("Informe o texto do conteúdo");  return; }
+        if (categoriasSelecionadas.isEmpty()) {
+            txtCategoriasErro.setText("Selecione ao menos uma categoria");
+            txtCategoriasErro.setVisibility(View.VISIBLE);
+            return;
+        }
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
 
         setCarregando(true);
 
-        // Fluxo: upload capa → upload arquivo → salva Firestore
         if (capaUri != null) {
             setStatus("Enviando imagem de capa...");
             ApiClient.getInstance().uploadArquivo(
                     this, capaUri, capaNome, capaMime,
                     new ApiClient.Callback<ApiClient.ArquivoApi>() {
-                        @Override
-                        public void onSucesso(ApiClient.ArquivoApi capa) {
-                            runOnUiThread(() -> uploadArquivoSeHouver(
-                                    titulo, descricao, user.getUid(), capa.getDownloadUrl()));
+                        @Override public void onSucesso(ApiClient.ArquivoApi r) {
+                            runOnUiThread(() -> uploadProximoArquivo(
+                                    titulo, descricao, texto, user.getUid(), r.getDownloadUrl(), 0));
                         }
-                        @Override
-                        public void onErro(String msg) {
-                            runOnUiThread(() -> {
-                                setCarregando(false);
-                                layoutTitulo.setError("Erro na capa: " + msg);
-                            });
+                        @Override public void onErro(String msg) {
+                            runOnUiThread(() -> { setCarregando(false); layoutTitulo.setError("Erro na capa: " + msg); });
                         }
                     });
         } else {
-            uploadArquivoSeHouver(titulo, descricao, user.getUid(), null);
+            uploadProximoArquivo(titulo, descricao, texto, user.getUid(), null, 0);
         }
     }
 
-    private void uploadArquivoSeHouver(String titulo, String descricao,
-                                        String uid, String capaUrl) {
-        if (arquivoUri != null) {
-            setStatus("Enviando arquivo...");
-            ApiClient.getInstance().uploadArquivo(
-                    this, arquivoUri, arquivoNome, arquivoMime,
-                    new ApiClient.Callback<ApiClient.ArquivoApi>() {
-                        @Override
-                        public void onSucesso(ApiClient.ArquivoApi arq) {
-                            runOnUiThread(() -> {
-                                setStatus("Salvando conteúdo...");
-                                salvarFirestore(titulo, descricao, uid, capaUrl,
-                                        arq.getDownloadUrl(), arq.id,
-                                        arq.contentType, arq.filename);
-                            });
-                        }
-                        @Override
-                        public void onErro(String msg) {
-                            runOnUiThread(() -> {
-                                setCarregando(false);
-                                layoutTitulo.setError("Erro no arquivo: " + msg);
-                            });
-                        }
-                    });
-        } else {
+    private void uploadProximoArquivo(String titulo, String descricao, String texto,
+                                      String uid, String capaUrl, int indice) {
+        if (indice >= arquivos.size()) {
             setStatus("Salvando conteúdo...");
-            salvarFirestore(titulo, descricao, uid, capaUrl,
-                    null, null, null, null);
+            salvarFirestore(titulo, descricao, texto, uid, capaUrl);
+            return;
         }
+
+        ArquivoSelecionado arq = arquivos.get(indice);
+        setStatus("Enviando arquivo " + (indice + 1) + " de " + arquivos.size() + "...");
+
+        ApiClient.getInstance().uploadArquivo(
+                this, arq.uri, arq.nome, arq.mime,
+                new ApiClient.Callback<ApiClient.ArquivoApi>() {
+                    @Override public void onSucesso(ApiClient.ArquivoApi r) {
+                        arq.uploadUrl = r.getDownloadUrl();
+                        arq.uploadId  = r.id;
+                        runOnUiThread(() -> uploadProximoArquivo(
+                                titulo, descricao, texto, uid, capaUrl, indice + 1));
+                    }
+                    @Override public void onErro(String msg) {
+                        runOnUiThread(() -> {
+                            setCarregando(false);
+                            layoutTitulo.setError("Erro no arquivo \"" + arq.nome + "\": " + msg);
+                        });
+                    }
+                });
     }
 
     // =========================================================================
     // FIRESTORE
     // =========================================================================
 
-    private void salvarFirestore(String titulo, String descricao, String uid,
-                                  String capaUrl,
-                                  String arquivoUrl, String arquivoId,
-                                  String arquivoTipo, String arquivoNomeOriginal) {
+    private void salvarFirestore(String titulo, String descricao, String texto,
+                                 String uid, String capaUrl) {
         db.collection("conteudos")
                 .orderBy("ordem", Query.Direction.DESCENDING)
                 .limit(1)
@@ -420,34 +524,42 @@ public class CriarConteudoActivity extends AppCompatActivity {
                             .format(new Date());
 
                     Map<String, Object> dados = new HashMap<>();
-                    dados.put("titulo",    titulo);
-                    dados.put("descricao", descricao);
-                    dados.put("data",      dataAtual);
-                    dados.put("ordem",     proximaOrdem);
-                    dados.put("criadoPor", uid);
-                    dados.put("categoria", tipoSelecionado);
+                    dados.put("titulo",      titulo);
+                    dados.put("descricao",   descricao);
+                    dados.put("texto",       texto);
+                    dados.put("data",        dataAtual);
+                    dados.put("ordem",       proximaOrdem);
+                    dados.put("criadoPor",   uid);
+                    dados.put("tipo",        tipoSelecionado);  // ← renomeado de "categoria"
+                    dados.put("categorias",  new ArrayList<>(categoriasSelecionadas)); // ← NOVO: lista
 
-                    // Cidade
-                    if (cidadeId != null)   dados.put("cidadeId",   cidadeId);
+                    if (cidadeId   != null) dados.put("cidadeId",   cidadeId);
                     if (cidadeNome != null) dados.put("cidadeNome", cidadeNome);
+                    if (capaUrl    != null) dados.put("capaUrl",    capaUrl);
 
-                    // Capa
-                    if (capaUrl != null) dados.put("capaUrl", capaUrl);
-
-                    // Arquivo
-                    if (arquivoUrl != null) {
+                    if (!arquivos.isEmpty()) {
+                        List<Map<String, Object>> listaArquivos = new ArrayList<>();
+                        for (ArquivoSelecionado arq : arquivos) {
+                            Map<String, Object> a = new HashMap<>();
+                            a.put("url",  arq.uploadUrl);
+                            a.put("id",   arq.uploadId);
+                            a.put("nome", arq.nome);
+                            a.put("tipo", arq.mime);
+                            listaArquivos.add(a);
+                        }
+                        dados.put("arquivos",    listaArquivos);
                         dados.put("temAnexo",    true);
-                        dados.put("arquivoUrl",  arquivoUrl);
-                        dados.put("arquivoId",   arquivoId);
-                        dados.put("arquivoTipo", arquivoTipo);
-                        dados.put("arquivoNome", arquivoNomeOriginal);
+                        // Compatibilidade com código legado
+                        dados.put("arquivoUrl",  arquivos.get(0).uploadUrl);
+                        dados.put("arquivoId",   arquivos.get(0).uploadId);
+                        dados.put("arquivoNome", arquivos.get(0).nome);
+                        dados.put("arquivoTipo", arquivos.get(0).mime);
                     } else {
                         dados.put("temAnexo", false);
                     }
 
                     db.collection("conteudos").add(dados)
                             .addOnSuccessListener(ref -> {
-                                // Incrementa qtdConteudos na cidade
                                 if (cidadeId != null && !cidadeId.equals("todas")) {
                                     db.collection("cidades").document(cidadeId)
                                             .update("qtdConteudos",
@@ -478,7 +590,7 @@ public class CriarConteudoActivity extends AppCompatActivity {
     private void setCarregando(boolean c) {
         progressBar.setVisibility(c ? View.VISIBLE : View.GONE);
         btnSalvar.setEnabled(!c);
-        btnSalvar.setText(c ? "Aguarde..." : "☁  Publicar conteúdo");
+        btnSalvar.setText(c ? "Aguarde..." : "Publicar conteúdo");
         if (!c) txtProgresso.setVisibility(View.GONE);
     }
 
