@@ -26,12 +26,12 @@ public class CriarUsuarioActivity extends AppCompatActivity {
 
     private TextInputLayout   layoutNome, layoutEmail, layoutSenha;
     private TextInputEditText editNome, editEmail, editSenha;
-    private LinearLayout      btnPerfilUsuario, btnPerfilProjeto, btnPerfilAdmin;
-    private TextView          txtPerfilUsuario, txtPerfilProjeto, txtPerfilAdmin;
+    private LinearLayout      btnPerfilProjeto, btnPerfilAdmin;
+    private TextView          txtPerfilProjeto, txtPerfilAdmin;
     private MaterialButton    btnCriar;
     private ProgressBar       progressBar;
 
-    private String perfilSelecionado = "usuario";
+    private String perfilSelecionado = "projeto";
 
     private FirebaseFirestore db;
 
@@ -60,10 +60,8 @@ public class CriarUsuarioActivity extends AppCompatActivity {
         editNome         = findViewById(R.id.editNome);
         editEmail        = findViewById(R.id.editEmail);
         editSenha        = findViewById(R.id.editSenha);
-        btnPerfilUsuario = findViewById(R.id.btnPerfilUsuario);
         btnPerfilProjeto = findViewById(R.id.btnPerfilProjeto);
         btnPerfilAdmin   = findViewById(R.id.btnPerfilAdmin);
-        txtPerfilUsuario = findViewById(R.id.txtPerfilUsuario);
         txtPerfilProjeto = findViewById(R.id.txtPerfilProjeto);
         txtPerfilAdmin   = findViewById(R.id.txtPerfilAdmin);
         btnCriar         = findViewById(R.id.btnCriar);
@@ -73,8 +71,7 @@ public class CriarUsuarioActivity extends AppCompatActivity {
     // ── Seletor de perfil ─────────────────────────────────────────────────────
 
     private void configurarSeletorPerfil() {
-        selecionarPerfil("usuario");
-        btnPerfilUsuario.setOnClickListener(v -> selecionarPerfil("usuario"));
+        selecionarPerfil("projeto");
         btnPerfilProjeto.setOnClickListener(v -> selecionarPerfil("projeto"));
         btnPerfilAdmin.setOnClickListener(v -> selecionarPerfil("admin"));
     }
@@ -87,9 +84,6 @@ public class CriarUsuarioActivity extends AppCompatActivity {
         int corInativo = 0xFFE8F5E9;
         int textoAtivo = 0xFFFFFFFF;
         int textoInativo = 0xFF2E7D32;
-
-        btnPerfilUsuario.setBackgroundColor("usuario".equals(perfil) ? corAtivo : corInativo);
-        txtPerfilUsuario.setTextColor("usuario".equals(perfil) ? textoAtivo : textoInativo);
 
         btnPerfilProjeto.setBackgroundColor("projeto".equals(perfil) ? corAtivo : corInativo);
         txtPerfilProjeto.setTextColor("projeto".equals(perfil) ? textoAtivo : textoInativo);
@@ -182,7 +176,7 @@ public class CriarUsuarioActivity extends AppCompatActivity {
                     editNome.setText("");
                     editEmail.setText("");
                     editSenha.setText("");
-                    selecionarPerfil("usuario");
+                    selecionarPerfil("projeto");
                 })
                 .show();
     }

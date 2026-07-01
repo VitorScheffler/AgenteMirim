@@ -18,6 +18,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import android.widget.Toast;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
@@ -43,6 +45,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
 
 import br.feevale.agentemirim.api.ApiClient;
 
@@ -99,6 +104,8 @@ public class CriarConteudoActivity extends AppCompatActivity {
     // ── Dados da cidade ───────────────────────────────────────────────────────
     private String cidadeId   = null;
     private String cidadeNome = null;
+    private String docId      = null;
+    private boolean modoEdicao = false;
 
     private FirebaseFirestore db;
 
@@ -153,15 +160,25 @@ public class CriarConteudoActivity extends AppCompatActivity {
 
         cidadeId   = getIntent().getStringExtra("cidadeId");
         cidadeNome = getIntent().getStringExtra("cidadeNome");
+        docId      = getIntent().getStringExtra("docId");
+        modoEdicao = docId != null;
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle(modoEdicao ? "Editar Conteúdo" : "Criar Conteúdo");
+        }
         toolbar.setNavigationOnClickListener(v -> finish());
 
         bindViews();
         configurarTipos();
         configurarCategorias();
+
+        if (modoEdicao) {
+            carregarDadosEdicao();
+            btnSalvar.setText("SALVAR ALTERAÇÕES");
+        }
 
         layoutUploadCapa.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         layoutUploadArquivo.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -432,6 +449,66 @@ public class CriarConteudoActivity extends AppCompatActivity {
     // PUBLICAR
     // =========================================================================
 
+    private void carregarDadosEdicao() {
+        setCarregando(true);
+        db.collection("conteudos").document(docId).get()
+                .addOnSuccessListener(doc -> {
+                    setCarregando(false);
+                    if (!doc.exists()) {
+                        finish();
+                        return;
+                    }
+
+                    editTitulo.setText(doc.getString("titulo"));
+                    editDescricao.setText(doc.getString("descricao"));
+                    editTexto.setText(doc.getString("texto"));
+
+                    String tipo = doc.getString("tipo");
+                    if (tipo != null) selecionarTipo(tipo);
+
+                    List<String> cats = (List<String>) doc.get("categorias");
+                    if (cats != null) {
+                        for (String cat : cats) {
+                            switch (cat) {
+                                case CAT_ENCHENTE:     toggleCategoria(CAT_ENCHENTE,     chipEnchente,     lblEnchente);     break;
+                                case CAT_DESLIZAMENTO: toggleCategoria(CAT_DESLIZAMENTO, chipDeslizamento, lblDeslizamento); break;
+                                case CAT_TEMPESTADE:   toggleCategoria(CAT_TEMPESTADE,   chipTempestade,   lblTempestade);   break;
+                                case CAT_OUTROS:       toggleCategoria(CAT_OUTROS,       chipOutros,       lblOutros);       break;
+                            }
+                        }
+                    }
+
+                    String capa = doc.getString("capaUrl");
+                    if (capa != null && !capa.isEmpty()) {
+                        layoutUploadCapa.setVisibility(View.GONE);
+                        cardPreviewCapa.setVisibility(View.VISIBLE);
+                        // Usando Glide para preview da capa existente
+                        GlideUrl glideUrl = new GlideUrl(capa, new LazyHeaders.Builder()
+                                .addHeader("Authorization", "Bearer " + "-R,V*ox+>K,0o76MH=XYNG9.sRz@xLLR")
+                                .addHeader("ngrok-skip-browser-warning", "true")
+                                .build());
+                        com.bumptech.glide.Glide.with(this).load(glideUrl).into(ivPreviewCapa);
+                    }
+
+                    List<Map<String, Object>> arqs = (List<Map<String, Object>>) doc.get("arquivos");
+                    if (arqs != null) {
+                        for (Map<String, Object> a : arqs) {
+                            ArquivoSelecionado as = new ArquivoSelecionado(null, (String) a.get("nome"), (String) a.get("tipo"));
+                            as.uploadUrl = (String) a.get("url");
+                            as.uploadId  = (String) a.get("id");
+                            arquivos.add(as);
+                            adicionarItemArquivoNaLista(as);
+                        }
+                        layoutArquivosSelecionados.setVisibility(View.VISIBLE);
+                        atualizarContadorArquivos();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    setCarregando(false);
+                    Toast.makeText(this, "Erro ao carregar dados", Toast.LENGTH_SHORT).show();
+                });
+    }
+
     private void publicar() {
         layoutTitulo.setError(null);
         layoutDescricao.setError(null);
@@ -509,6 +586,52 @@ public class CriarConteudoActivity extends AppCompatActivity {
 
     private void salvarFirestore(String titulo, String descricao, String texto,
                                  String uid, String capaUrl) {
+
+        Map<String, Object> dados = new HashMap<>();
+        dados.put("titulo",      titulo);
+        dados.put("descricao",   descricao);
+        dados.put("texto",       texto);
+        dados.put("tipo",        tipoSelecionado);
+        dados.put("categorias",  new ArrayList<>(categoriasSelecionadas));
+
+        if (capaUrl != null) dados.put("capaUrl", capaUrl);
+
+        if (!arquivos.isEmpty()) {
+            List<Map<String, Object>> listaArquivos = new ArrayList<>();
+            for (ArquivoSelecionado arq : arquivos) {
+                Map<String, Object> a = new HashMap<>();
+                a.put("url",  arq.uploadUrl);
+                a.put("id",   arq.uploadId);
+                a.put("nome", arq.nome);
+                a.put("tipo", arq.mime);
+                listaArquivos.add(a);
+            }
+            dados.put("arquivos",    listaArquivos);
+            dados.put("temAnexo",    true);
+            dados.put("arquivoUrl",  arquivos.get(0).uploadUrl);
+            dados.put("arquivoId",   arquivos.get(0).uploadId);
+            dados.put("arquivoNome", arquivos.get(0).nome);
+            dados.put("arquivoTipo", arquivos.get(0).mime);
+        } else {
+            dados.put("temAnexo", false);
+            dados.put("arquivos", new ArrayList<>());
+        }
+
+        if (modoEdicao) {
+            db.collection("conteudos").document(docId).update(dados)
+                    .addOnSuccessListener(v -> {
+                        setCarregando(false);
+                        Toast.makeText(this, "Conteúdo atualizado!", Toast.LENGTH_SHORT).show();
+                        setResult(RESULT_OK);
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        setCarregando(false);
+                        layoutTitulo.setError("Erro: " + e.getMessage());
+                    });
+            return;
+        }
+
         db.collection("conteudos")
                 .orderBy("ordem", Query.Direction.DESCENDING)
                 .limit(1)
@@ -523,40 +646,12 @@ public class CriarConteudoActivity extends AppCompatActivity {
                     String dataAtual = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                             .format(new Date());
 
-                    Map<String, Object> dados = new HashMap<>();
-                    dados.put("titulo",      titulo);
-                    dados.put("descricao",   descricao);
-                    dados.put("texto",       texto);
                     dados.put("data",        dataAtual);
                     dados.put("ordem",       proximaOrdem);
                     dados.put("criadoPor",   uid);
-                    dados.put("tipo",        tipoSelecionado);  // ← renomeado de "categoria"
-                    dados.put("categorias",  new ArrayList<>(categoriasSelecionadas)); // ← NOVO: lista
 
                     if (cidadeId   != null) dados.put("cidadeId",   cidadeId);
                     if (cidadeNome != null) dados.put("cidadeNome", cidadeNome);
-                    if (capaUrl    != null) dados.put("capaUrl",    capaUrl);
-
-                    if (!arquivos.isEmpty()) {
-                        List<Map<String, Object>> listaArquivos = new ArrayList<>();
-                        for (ArquivoSelecionado arq : arquivos) {
-                            Map<String, Object> a = new HashMap<>();
-                            a.put("url",  arq.uploadUrl);
-                            a.put("id",   arq.uploadId);
-                            a.put("nome", arq.nome);
-                            a.put("tipo", arq.mime);
-                            listaArquivos.add(a);
-                        }
-                        dados.put("arquivos",    listaArquivos);
-                        dados.put("temAnexo",    true);
-                        // Compatibilidade com código legado
-                        dados.put("arquivoUrl",  arquivos.get(0).uploadUrl);
-                        dados.put("arquivoId",   arquivos.get(0).uploadId);
-                        dados.put("arquivoNome", arquivos.get(0).nome);
-                        dados.put("arquivoTipo", arquivos.get(0).mime);
-                    } else {
-                        dados.put("temAnexo", false);
-                    }
 
                     db.collection("conteudos").add(dados)
                             .addOnSuccessListener(ref -> {

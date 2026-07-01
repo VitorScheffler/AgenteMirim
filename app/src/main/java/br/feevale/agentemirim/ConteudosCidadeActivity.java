@@ -59,7 +59,7 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
     private ConteudoCidadeAdapter adapter;
 
     // ── Categorias ────────────────────────────────────────────────────────────
-    private static final String[] CATEGORIAS       = {"todos","dica","video","noticia","material"};
+    private static final String[] CATEGORIAS       = {"todos","enchente","deslizamento","tempestade","outros"};
     private static final String[] CATEGORIAS_LABEL = {"Todos","Enchentes","Deslizamentos","Tempestades","Outros"};
 
     @Override
@@ -330,7 +330,12 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
         intent.putExtra(DetalheConteudoActivity.EXTRA_TITULO,       doc.getString("titulo"));
         intent.putExtra(DetalheConteudoActivity.EXTRA_DESCRICAO,    doc.getString("descricao"));
         intent.putExtra(DetalheConteudoActivity.EXTRA_DATA,         doc.getString("data"));
-        intent.putExtra(DetalheConteudoActivity.EXTRA_CATEGORIA,    doc.getString("categoria"));
+
+        // Usa "tipo" para os visuais no detalhe (dica, video, etc)
+        String tipo = doc.getString("tipo");
+        if (tipo == null) tipo = doc.getString("categoria");
+        intent.putExtra(DetalheConteudoActivity.EXTRA_CATEGORIA,    tipo);
+
         intent.putExtra(DetalheConteudoActivity.EXTRA_TEM_ANEXO,
                 Boolean.TRUE.equals(doc.getBoolean("temAnexo")));
         intent.putExtra(DetalheConteudoActivity.EXTRA_ARQUIVO_URL,  doc.getString("arquivoUrl"));
@@ -339,6 +344,7 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
         intent.putExtra(DetalheConteudoActivity.EXTRA_ARQUIVO_ID,   doc.getString("arquivoId"));
         intent.putExtra(DetalheConteudoActivity.EXTRA_CAPA_URL,     doc.getString("capaUrl")); // ← FIX
         intent.putExtra("cidadeNome", cidadeNome);
+        intent.putExtra("cidadeId",   cidadeId);
         startActivity(intent);
     }
 
@@ -356,12 +362,23 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
             this.listaFiltrada = new ArrayList<>(lista);
         }
 
-        void filtrar(String categoria) {
+        void filtrar(String filtro) {
             listaFiltrada.clear();
             for (DocumentSnapshot doc : listaOriginal) {
-                String cat = doc.getString("categoria") != null
-                        ? doc.getString("categoria").toLowerCase() : "outro";
-                if ("todos".equals(categoria) || cat.equals(categoria)) listaFiltrada.add(doc);
+                if ("todos".equals(filtro)) {
+                    listaFiltrada.add(doc);
+                } else {
+                    List<String> cats = (List<String>) doc.get("categorias");
+                    if (cats != null && cats.contains(filtro)) {
+                        listaFiltrada.add(doc);
+                    } else {
+                        // Fallback para documentos legados que usavam a string única
+                        String catLegada = doc.getString("categoria");
+                        if (catLegada != null && catLegada.equalsIgnoreCase(filtro)) {
+                            listaFiltrada.add(doc);
+                        }
+                    }
+                }
             }
             notifyDataSetChanged();
         }
@@ -379,7 +396,12 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
 
             String titulo    = doc.getString("titulo")    != null ? doc.getString("titulo")    : "";
             String data      = doc.getString("data")      != null ? doc.getString("data")      : "";
-            String categoria = doc.getString("categoria") != null ? doc.getString("categoria") : "outro";
+
+            // O "tipo" agora define o visual (dica, video, etc)
+            String tipo = doc.getString("tipo");
+            if (tipo == null) tipo = doc.getString("categoria");
+            if (tipo == null) tipo = "dica";
+
             String capaUrl   = doc.getString("capaUrl");
             String arqTipo   = doc.getString("arquivoTipo");
             Boolean temAnexo = doc.getBoolean("temAnexo");
@@ -391,8 +413,8 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
             int chars = desc != null ? desc.length() : 0;
             holder.txtTempo.setText(Math.max(1, chars / 200) + " min");
 
-            String badge = badgeLabel(categoria);
-            int    cor   = corCategoria(categoria);
+            String badge = badgeLabel(tipo);
+            int    cor   = corCategoria(tipo);
             holder.txtBadge.setText(badge);
             GradientDrawable badgeBg = new GradientDrawable();
             badgeBg.setShape(GradientDrawable.RECTANGLE);
@@ -403,8 +425,8 @@ public class ConteudosCidadeActivity extends AppCompatActivity {
             if (capaUrl != null && !capaUrl.isEmpty()) {
                 carregarImagem(holder.ivThumb, capaUrl);
             } else {
-                holder.ivThumb.setBackgroundColor(corFundo(categoria));
-                holder.ivThumb.setImageResource(icone(categoria));
+                holder.ivThumb.setBackgroundColor(corFundo(tipo));
+                holder.ivThumb.setImageResource(icone(tipo));
                 holder.ivThumb.setColorFilter(cor);
             }
 

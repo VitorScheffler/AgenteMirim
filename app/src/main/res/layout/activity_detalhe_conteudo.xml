@@ -230,8 +230,20 @@
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
                     android:textColor="#424242"
+                    android:textStyle="italic"
                     android:lineSpacingExtra="6dp"
                     android:layout_marginBottom="16dp"/>
+
+                <!-- Texto Completo (Novo) -->
+                <TextView
+                    android:id="@+id/txtTextoCompleto"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#1A1A1A"
+                    android:lineSpacingExtra="6dp"
+                    android:layout_marginBottom="20dp"
+                    android:visibility="gone"/>
 
                 <!-- Card: O que você vai aprender -->
                 <androidx.cardview.widget.CardView
@@ -322,123 +334,6 @@
                         app:elevation="0dp"
                         app:strokeColor="#FFCDD2"
                         app:strokeWidth="1dp"/>
-
-                </LinearLayout>
-
-                <!-- Modo edição -->
-                <LinearLayout
-                    android:id="@+id/layoutEdicao"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="0dp"
-                        app:cardBackgroundColor="#FFFFFF">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="16dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="EDITANDO"
-                                android:textSize="10sp"
-                                android:textColor="#388E3C"
-                                android:textStyle="bold"
-                                android:letterSpacing="0.1"
-                                android:layout_marginBottom="12dp"/>
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/layoutEditTitulo"
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"
-                                android:hint="Título"
-                                app:boxCornerRadiusTopStart="12dp"
-                                app:boxCornerRadiusTopEnd="12dp"
-                                app:boxCornerRadiusBottomStart="12dp"
-                                app:boxCornerRadiusBottomEnd="12dp"
-                                app:boxStrokeColor="#C8E6C9"
-                                app:boxBackgroundColor="#F9FBF9">
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/editTitulo"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="textCapSentences"
-                                    android:textColor="#1A1A1A"
-                                    android:textSize="14sp"
-                                    android:padding="14dp"/>
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/layoutEditDescricao"
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="14dp"
-                                android:hint="Descrição"
-                                app:boxCornerRadiusTopStart="12dp"
-                                app:boxCornerRadiusTopEnd="12dp"
-                                app:boxCornerRadiusBottomStart="12dp"
-                                app:boxCornerRadiusBottomEnd="12dp"
-                                app:boxStrokeColor="#C8E6C9"
-                                app:boxBackgroundColor="#F9FBF9">
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/editDescricao"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="textMultiLine|textCapSentences"
-                                    android:minLines="3"
-                                    android:gravity="top"
-                                    android:textColor="#1A1A1A"
-                                    android:textSize="14sp"
-                                    android:padding="14dp"/>
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal">
-
-                                <com.google.android.material.button.MaterialButton
-                                    android:id="@+id/btnCancelarEdicao"
-                                    android:layout_width="0dp"
-                                    android:layout_height="46dp"
-                                    android:layout_weight="1"
-                                    android:layout_marginEnd="8dp"
-                                    android:text="Cancelar"
-                                    android:textColor="#757575"
-                                    android:textSize="13sp"
-                                    app:backgroundTint="#F5F5F5"
-                                    app:cornerRadius="12dp"
-                                    app:elevation="0dp"/>
-
-                                <com.google.android.material.button.MaterialButton
-                                    android:id="@+id/btnSalvarEdicao"
-                                    android:layout_width="0dp"
-                                    android:layout_height="46dp"
-                                    android:layout_weight="1"
-                                    android:text="Salvar"
-                                    android:textColor="#FFFFFF"
-                                    android:textStyle="bold"
-                                    android:textSize="13sp"
-                                    app:backgroundTint="#2E7D32"
-                                    app:cornerRadius="12dp"
-                                    app:elevation="0dp"/>
-
-                            </LinearLayout>
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
 
                 </LinearLayout>
 

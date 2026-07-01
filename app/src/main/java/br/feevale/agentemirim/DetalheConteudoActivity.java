@@ -79,14 +79,11 @@ public class DetalheConteudoActivity extends AppCompatActivity {
 
     // ── Views: painel "sobre" ─────────────────────────────────────────────────
     private TextView     txtDescricao;
+    private TextView     txtTextoCompleto; // ← NOVO
     private View         cardAprender;
     private LinearLayout layoutTopicos;
     private LinearLayout layoutAcoes;
     private MaterialButton btnEditar, btnApagar;
-    private LinearLayout layoutEdicao;
-    private TextInputLayout layoutEditTitulo, layoutEditDescricao;
-    private TextInputEditText editTitulo, editDescricao;
-    private MaterialButton btnSalvarEdicao, btnCancelarEdicao;
 
     // ── Views: painel "materiais" ─────────────────────────────────────────────
     private LinearLayout layoutArquivos;
@@ -98,7 +95,7 @@ public class DetalheConteudoActivity extends AppCompatActivity {
 
     // ── Dados ─────────────────────────────────────────────────────────────────
     private String docId, arquivoUrl, arquivoNome, arquivoTipo, arquivoId, capaUrl;
-    private String categoriaAtual, cidadeNome;
+    private String categoriaAtual, cidadeNome, cidadeId;
 
     private FirebaseFirestore db;
 
@@ -149,18 +146,12 @@ public class DetalheConteudoActivity extends AppCompatActivity {
         painelMateriais     = findViewById(R.id.painelMateriais);
 
         txtDescricao        = findViewById(R.id.txtDescricao);
+        txtTextoCompleto    = findViewById(R.id.txtTextoCompleto); // ← NOVO
         cardAprender        = findViewById(R.id.cardAprender);
         layoutTopicos       = findViewById(R.id.layoutTopicos);
         layoutAcoes         = findViewById(R.id.layoutAcoes);
         btnEditar           = findViewById(R.id.btnEditar);
         btnApagar           = findViewById(R.id.btnApagar);
-        layoutEdicao        = findViewById(R.id.layoutEdicao);
-        layoutEditTitulo    = findViewById(R.id.layoutEditTitulo);
-        layoutEditDescricao = findViewById(R.id.layoutEditDescricao);
-        editTitulo          = findViewById(R.id.editTitulo);
-        editDescricao       = findViewById(R.id.editDescricao);
-        btnSalvarEdicao     = findViewById(R.id.btnSalvarEdicao);
-        btnCancelarEdicao   = findViewById(R.id.btnCancelarEdicao);
 
         layoutArquivos      = findViewById(R.id.layoutArquivos);
         txtSemArquivos      = findViewById(R.id.txtSemArquivos);
@@ -168,7 +159,6 @@ public class DetalheConteudoActivity extends AppCompatActivity {
         progressBar           = findViewById(R.id.progressBar);
 
         layoutAcoes.setVisibility(View.GONE);
-        layoutEdicao.setVisibility(View.GONE);
     }
 
     // =========================================================================
@@ -186,6 +176,7 @@ public class DetalheConteudoActivity extends AppCompatActivity {
         capaUrl        = i.getStringExtra(EXTRA_CAPA_URL);
         categoriaAtual = i.getStringExtra(EXTRA_CATEGORIA);
         cidadeNome     = i.getStringExtra("cidadeNome");
+        cidadeId       = i.getStringExtra("cidadeId");
 
         String titulo    = i.getStringExtra(EXTRA_TITULO);
         String descricao = i.getStringExtra(EXTRA_DESCRICAO);
@@ -198,13 +189,23 @@ public class DetalheConteudoActivity extends AppCompatActivity {
         txtData.setText(data        != null ? data      : "");
         txtCidade.setText(cidadeNome != null ? cidadeNome : "");
 
+        // Carrega texto completo do Firestore (pois não veio no Intent)
+        if (docId != null) {
+            db.collection("conteudos").document(docId).get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc.exists()) {
+                            String texto = doc.getString("texto");
+                            if (txtTextoCompleto != null) {
+                                txtTextoCompleto.setText(texto != null ? texto : "");
+                                txtTextoCompleto.setVisibility(TextUtils.isEmpty(texto) ? View.GONE : View.VISIBLE);
+                            }
+                        }
+                    });
+        }
+
         // Tempo estimado de leitura
         int chars = descricao != null ? descricao.length() : 0;
         txtTempoLeitura.setText(Math.max(1, chars / 200) + " min de leitura");
-
-        // Pré-preenche campos de edição
-        editTitulo.setText(titulo    != null ? titulo    : "");
-        editDescricao.setText(descricao != null ? descricao : "");
 
         // ── Badge de categoria ────────────────────────────────────────────────
         String badge = badgeLabel(categoriaAtual);
@@ -409,59 +410,20 @@ public class DetalheConteudoActivity extends AppCompatActivity {
     // =========================================================================
 
     private void entrarModoEdicao() {
-        txtTitulo.setVisibility(View.GONE);
-        txtDescricao.setVisibility(View.GONE);
-        cardAprender.setVisibility(View.GONE);
-        layoutAcoes.setVisibility(View.GONE);
-        layoutEdicao.setVisibility(View.VISIBLE);
-        btnSalvarEdicao.setOnClickListener(v -> salvarEdicao());
-        btnCancelarEdicao.setOnClickListener(v -> cancelarEdicao());
+        Intent intent = new Intent(this, CriarConteudoActivity.class);
+        intent.putExtra("docId", docId);
+        intent.putExtra("cidadeId", cidadeId);
+        intent.putExtra("cidadeNome", cidadeNome);
+        startActivityForResult(intent, 200);
     }
 
-    private void cancelarEdicao() {
-        layoutEdicao.setVisibility(View.GONE);
-        txtTitulo.setVisibility(View.VISIBLE);
-        txtDescricao.setVisibility(View.VISIBLE);
-        cardAprender.setVisibility(View.VISIBLE);
-        layoutAcoes.setVisibility(View.VISIBLE);
-        layoutEditTitulo.setError(null);
-        layoutEditDescricao.setError(null);
-    }
-
-    private void salvarEdicao() {
-        layoutEditTitulo.setError(null);
-        layoutEditDescricao.setError(null);
-
-        String novoTitulo    = editTitulo.getText()    != null ? editTitulo.getText().toString().trim()    : "";
-        String novaDescricao = editDescricao.getText() != null ? editDescricao.getText().toString().trim() : "";
-
-        if (TextUtils.isEmpty(novoTitulo))    { layoutEditTitulo.setError("Informe o título");     return; }
-        if (TextUtils.isEmpty(novaDescricao)) { layoutEditDescricao.setError("Informe a descrição"); return; }
-        if (docId == null) return;
-
-        setCarregando(true);
-
-        Map<String, Object> dados = new HashMap<>();
-        dados.put("titulo",    novoTitulo);
-        dados.put("descricao", novaDescricao);
-
-        db.collection("conteudos").document(docId).update(dados)
-                .addOnSuccessListener(v -> {
-                    setCarregando(false);
-                    txtTitulo.setText(novoTitulo);
-                    txtDescricao.setText(novaDescricao);
-                    editTitulo.setText(novoTitulo);
-                    editDescricao.setText(novaDescricao);
-                    cancelarEdicao();
-                    new AlertDialog.Builder(this)
-                            .setTitle("✅ Salvo!")
-                            .setMessage("Conteúdo atualizado com sucesso.")
-                            .setPositiveButton("OK", null).show();
-                })
-                .addOnFailureListener(e -> {
-                    setCarregando(false);
-                    layoutEditTitulo.setError("Erro: " + e.getMessage());
-                });
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 200 && resultCode == RESULT_OK) {
+            // Recarrega dados
+            recreate();
+        }
     }
 
     // =========================================================================
@@ -484,6 +446,12 @@ public class DetalheConteudoActivity extends AppCompatActivity {
 
         db.collection("conteudos").document(docId).delete()
                 .addOnSuccessListener(v -> {
+                    // Decrementa contador na cidade
+                    if (cidadeId != null && !cidadeId.equals("todas")) {
+                        db.collection("cidades").document(cidadeId)
+                                .update("qtdConteudos", com.google.firebase.firestore.FieldValue.increment(-1));
+                    }
+
                     if (arquivoId != null && !arquivoId.isEmpty()) {
                         ApiClient.getInstance().deletarArquivo(arquivoId,
                                 new ApiClient.Callback<Void>() {
@@ -549,7 +517,6 @@ public class DetalheConteudoActivity extends AppCompatActivity {
         progressBar.setVisibility(c ? View.VISIBLE : View.GONE);
         if (btnEditar  != null) btnEditar.setEnabled(!c);
         if (btnApagar  != null) btnApagar.setEnabled(!c);
-        if (btnSalvarEdicao != null) btnSalvarEdicao.setEnabled(!c);
     }
 
     private static final String AUTH_TOKEN = "-R,V*ox+>K,0o76MH=XYNG9.sRz@xLLR";

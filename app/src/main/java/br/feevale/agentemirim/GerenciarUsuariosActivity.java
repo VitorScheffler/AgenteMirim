@@ -102,6 +102,7 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
         setCarregando(true);
 
         db.collection("usuarios")
+                .whereIn("perfil", java.util.Arrays.asList("admin", "projeto"))
                 .get()
                 .addOnSuccessListener(query -> {
                     setCarregando(false);
@@ -137,7 +138,6 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
         TextInputEditText editNome  = view.findViewById(R.id.editNomeDialog);
         TextInputEditText editEmail = view.findViewById(R.id.editEmailDialog);
         TextView txtPerfilAtual     = view.findViewById(R.id.txtPerfilAtual);
-        TextView btnUsuario         = view.findViewById(R.id.btnDialogUsuario);
         TextView btnProjeto         = view.findViewById(R.id.btnDialogProjeto);
         TextView btnAdmin           = view.findViewById(R.id.btnDialogAdmin);
 
@@ -148,19 +148,15 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
         txtPerfilAtual.setText("Perfil atual: " + labelPerfil);
 
         final String[] perfilSelecionado = {perfil};
-        atualizarBotoesPerfil(btnUsuario, btnProjeto, btnAdmin, perfilSelecionado[0]);
+        atualizarBotoesPerfil(btnProjeto, btnAdmin, perfilSelecionado[0]);
 
-        btnUsuario.setOnClickListener(v -> {
-            perfilSelecionado[0] = "usuario";
-            atualizarBotoesPerfil(btnUsuario, btnProjeto, btnAdmin, "usuario");
-        });
         btnProjeto.setOnClickListener(v -> {
             perfilSelecionado[0] = "projeto";
-            atualizarBotoesPerfil(btnUsuario, btnProjeto, btnAdmin, "projeto");
+            atualizarBotoesPerfil(btnProjeto, btnAdmin, "projeto");
         });
         btnAdmin.setOnClickListener(v -> {
             perfilSelecionado[0] = "admin";
-            atualizarBotoesPerfil(btnUsuario, btnProjeto, btnAdmin, "admin");
+            atualizarBotoesPerfil(btnProjeto, btnAdmin, "admin");
         });
 
         new AlertDialog.Builder(this)
@@ -176,15 +172,12 @@ public class GerenciarUsuariosActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void atualizarBotoesPerfil(TextView btnUsuario, TextView btnProjeto,
+    private void atualizarBotoesPerfil(TextView btnProjeto,
                                         TextView btnAdmin, String selecionado) {
         int corAtivo    = 0xFF2E7D32;
         int corInativo  = 0xFFE8F5E9;
         int textoAtivo  = 0xFFFFFFFF;
         int textoInativo= 0xFF2E7D32;
-
-        btnUsuario.setBackgroundColor("usuario".equals(selecionado) ? corAtivo : corInativo);
-        btnUsuario.setTextColor("usuario".equals(selecionado) ? textoAtivo : textoInativo);
 
         btnProjeto.setBackgroundColor("projeto".equals(selecionado) ? corAtivo : corInativo);
         btnProjeto.setTextColor("projeto".equals(selecionado) ? textoAtivo : textoInativo);
